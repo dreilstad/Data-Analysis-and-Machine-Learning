@@ -1,28 +1,35 @@
 import numpy as np
 import sympy as sym
 
-def get_X_poly2D(x,y,deg):
-    X = []
-    for i in range(deg + 1):
-        for n in range(i+1):
-            X.append(x**n * y**(i-n))
-    X = (np.array(X).T).squeeze()
-    return X
-
 '''
+np.random.seed(2020)
 N = 10
 
 x = np.random.rand(N)
 y = np.random.rand(N)
-np.set_printoptions(precision=3)
+
 print(x)
 print(y)
 
-X = np.c_[np.ones(N),
-		  x,y,
-		  x**2,x*y,y**2,
-		  x**3,x**2*y,x*y**2,y**3,
-		  x**4,x**3*y,x**2*y**2,x*y**3,y**4,
-		  x**5,x**4*y,x**3*y**2,x**2*y**3,x*y**4,y**5]
+x = np.random.rand(N)
+y = np.random.rand(N)
+
+print(x)
+print(y)
+
+
+def matprint(mat, fmt="g"):
+    col_maxes = [max([len(("{:"+fmt+"}").format(x)) for x in col]) for col in mat.T]
+    for x in mat:
+        for i, y in enumerate(x):
+            print(("{:"+str(col_maxes[i])+fmt+"}").format(y), end="  ")
+        print("")
 '''
-print(X)
+N = 10
+x = np.eye(N)
+randomIndices = np.random.randint(0, N, N)
+y = x[randomIndices,:]
+print(x)
+print("")
+print(y)
+

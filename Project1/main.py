@@ -4,6 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import sklearn.linear_model as skl
 from regression import Regression
+from analysis import Analysis
+from franke import plotFranke
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, PolynomialFeatures
 from sklearn.metrics import mean_squared_error
@@ -31,63 +33,128 @@ def data_path(dat_id):
 def save_fig(fig_id):
     plt.savefig(image_path(fig_id) + ".png", format='png')
 
-class Project:
+np.random.seed(2020)
 
-    def __init__(self):
-        self.regression = None
+def computeDesignMatrix(x, y, degree):
+	N = len(x)
+	P = int(degree*(degree+3)/2)
 
+	X = np.zeros(shape=(N, P+1))
+	X[:,0] = 1.0
+
+	index = 1
+	for i in range(1, degree + 1):
+		for j in range(i + 1):
+			X[:,index] = (x**(i - j)) * (y**j)
+			index += 1
+	
+	return X
+
+def generateData(N):
+    x, y = np.random.uniform(0, 1, size=(2, N))
+    return x, y
+
+def addNoise(x, y, noise_strength, N):
     
-    def generateData(self, N, noise=False, noise_strength=0.0):
+    noise_amount = np.random.normal(0, noise_strength, N)
+    x += noise_amount
+    y += noise_amount
 
-        x1, x2 = np.random.uniform(0, 1, size=(2, N))
-        self.x1 = x1
-        self.x2 = x2
+    return x, y
 
-        if noise:
-            addNoise(noise_strength)
+def frankeFunction(x, y):
+    term1 = 0.75*np.exp(-(0.25*(9*x-2)**2) - 0.25*((9*y-2)**2)) 
+    term2 = 0.75*np.exp(-((9*x+1)**2)/49.0 - 0.1*(9*y+1))
+    term3 = 0.5*np.exp(-(9*x-7)**2/4.0 - 0.25*((9*y-3)**2)) 
+    term4 = -0.2*np.exp(-(9*x-4)**2 - (9*y-7)**2)
+    return term1 + term2 + term3 + term4
+
+'''
+def bootstrap(N, DesignMatrix, z, k):
+
+    for i in range(k):
+
+        randomIndices = np.random.randint(0, N, N)
+        Xi = DesignMatrix[randomIndices,:]
+
+        OLS_i = Regression(DesignMatrix, z)
+        OLS_i.splitData(0.2)
+        OLS_i.fit()
+        OLS_i.predict()
+'''
+
+
+def partA(N, noise):
+
+    MSE_training_scores = []
+    R2_training_scores = []
+    Betas_training = []
+
+    MSE_test_scores = []
+    R2_test_scores = []
+    Betas_test = []
+
+    '''
+    MSE_scores_noisy = []
+    R2_scores_noisy = []
+    Betas_noisy = []
+    '''
+
+    for degree in range(2, 6):
         
-    def scaleData(self):
-        scaler = StandardScaler()
-        scaler.fit(self.X_train)
-        X_train_scaled = scaler.transform(self.X_train)
-        X_test_scaled = scaler.transform(self.X_test)
-        return X_train_scaled, X_test_scaled
-
-    def addNoise(self, noise_strength):
+        x, y = generateData(N)
+        #x_noisy, y_noisy = addNoise(x.copy(), y.copy(), noise)
         
-        noise_amount = noise_strength * np.random.normal(0, 1, self.N)
-        self.x1 += noise_amount
-        self.x2 += noise_amount
+        z = frankeFunction(x, y)
+        #z_noisy = frankeFunction(x_noisy, y_noisy)
 
-    def getPolynomial(self, degree=5):
-        return polyvander2d(self.x1, self.x2, (degree, degree))
-    
-    def getFrankeFunction(self, x, y):
-        term1 = 0.75*np.exp(-(0.25*(9*x-2)**2) - 0.25*((9*y-2)**2)) 
-        term2 = 0.75*np.exp(-((9*x+1)**2)/49.0 - 0.1*(9*y+1))
-        term3 = 0.5*np.exp(-(9*x-7)**2/4.0 - 0.25*((9*y-3)**2)) 
-        term4 = -0.2*np.exp(-(9*x-4)**2 - (9*y-7)**2)
-        return term1 + term2 + term3 + term4
+        DesignMatrix = computeDesignMatrix(x, y, degree)
+        #DesignMatrix_noisy = computeDesignMatrix(x_noisy, y_noisy, degree)
 
+        OLS = Regression(DesignMatrix, z)
+        OLS.splitData(0.2)
+        OLS.scaleData()
+        OLS.fit()
+        OLS.predict()
+        OLS.predict(test=True)
 
-def partA(N, degree):
+        MSE_training_scores.append(Analysis.MSE(OLS.z_train, OLS.z_tilde))
+        R2_training_scores.append(Analysis.R2(OLS.z_train, OLS.z_tilde))
+        #Betas_training.append(Analysis.betaCoeffVariance(OLS.X_train, OLS.z_train, OLS.z_tilde))
 
-    partA = Project()
-    partA.generateData(N)
+        MSE_test_scores.append(Analysis.MSE(OLS.z_test, OLS.z_predict))
+        R2_test_scores.append(Analysis.R2(OLS.z_test, OLS.z_predict))
+        
+        '''
+        OLS_noisy = Regression(DesignMatrix_noisy, z_noisy)
+        OLS_noisy.splitData(0.2)
+        OLS_noisy.scaleData()
 
-    y = partA.getFrankeFunction(partA.x1, partA.x2)
-    X = partA.getPolynomial()
+        Beta_OLS_noisy = OLS_noisy.beta()
+        z_tilde_OLS_noisy = OLS_noisy.fit()
 
-    ols = Regression(X, y)
-    ols.splitData()
-    X_train_scaled, X_test_scaled = ols.scaleData()
-    
-    beta_OLS = ols.beta()
-    y_predict = ols.fit()
+        MSE_scores_noisy.append(Analysis.MSE(OLS_noisy))
+        R2_scores_noisy.append(Analysis.R2(OLS_noisy))
+        Betas_noisy.append(Analysis.betaCoeffVariance(OLS_noisy))
+        '''
 
+    print("----     Training       ----\n")
+    degree = 2
+    for i in range(len(MSE_training_scores)):
+        print("Degree " + str(degree))
+        print("MSE: " + str(MSE_training_scores[i]))
+        print("R2: " + str(R2_training_scores[i]))
+        print("")
+        degree += 1
 
+    print("----     Test       ----\n")
+    degree = 2
+    for i in range(len(MSE_test_scores)):
+        print("Degree " + str(degree))
+        print("MSE: " + str(MSE_test_scores[i]))
+        print("R2: " + str(R2_test_scores[i]))
+        print("")
+        degree += 1
 
-    print(X)
-
-
-partA(10, 5)
+N = 500
+partA(N, 0.0)
