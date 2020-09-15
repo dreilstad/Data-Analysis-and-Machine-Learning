@@ -19,7 +19,7 @@ class Regression(object):
             return self.beta
 
     def OrdinaryLeastSquares(self):
-        return np.linalg.pinv(self.X_train.T @ self.X_train) @ self.X_train.T @ self.z_train
+        return np.linalg.pinv(self.X_train) @ self.z_train
 
 
     def fit(self):
@@ -39,15 +39,21 @@ class Regression(object):
         pass
 
     def scaleData(self):
-        '''
-        scaler = StandardScaler()
+        """
+        Scales the data by subtracting the mean. 
+        Before scaling, the intercept is removed and afterwards added back to the design matrix
+        """
+        self.X_train = self.X_train[:,1:]
+        self.X_test = self.X_test[:,1:]
+
+        scaler = StandardScaler(with_mean=True, with_std=False)
         scaler.fit(self.X_train)
         self.X_train = scaler.transform(self.X_train)
         self.X_test = scaler.transform(self.X_test)
-        '''
 
-        self.X_train -= np.mean(self.X_train)
-        self.X_test -= np.mean(self.X_test)
+
+        self.X_train = np.c_[self.X_train, np.ones(self.X_train.shape[0])]
+        self.X_test = np.c_[self.X_test, np.ones(self.X_test.shape[0])]
 
     def splitData(self, testdata_size):
         X_train, X_test, z_train, z_test = train_test_split(self.X, self.z, test_size=testdata_size)
