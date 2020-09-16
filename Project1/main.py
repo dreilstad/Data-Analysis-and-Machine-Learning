@@ -69,11 +69,72 @@ def frankeFunction(x, y, noise=0.0):
     term4 = -0.2*np.exp(-(9*x-4)**2 - (9*y-7)**2)
     return term1 + term2 + term3 + term4 + np.random.normal(0, noise, len(x))
 
-def kFoldValidation(x, y, z, degree, k):
+def kFoldSplit(X, z, folds):
+
+    if X.shape[0] % folds != 0:
+        print("Not able to divide dataset in k = " + str(k) + " folds evenly!")
+        exit(1)
+
+    len_fold = X.shape[0]//folds
+
+    # shuffles dataset
+    random_indices = np.random.randint(0, X.shape[0], X.shape[0])
+
+    train_indices = []
+    test_indices = []
+
+    for k in range(folds):
+
+        # calculate the start and end index of testfold with current k
+        test_start_index = k * len_fold
+        test_end_index = len_fold * (k + 1)
+
+        # slices by start and end index of testfold with current k, 
+        # concatenates the remaining indices which becomes training set
+        test_indices.append(random_indices[test_start_index:test_end_index])
+        train_indices.append(np.hstack((random_indices[:test_start_index], random_indices[test_end_index:])))
+
+
+    return train_indices, test_indices
+
+
+def kFoldCrossValidation(x, y, z, degree, k_folds):
 
     DesignMatrix = computeDesignMatrix(x, y, degree)
     
-    OLS_kfold = 0
+    OLS_kfold = Regression(DesignMatrix, z)
+    OLS_kfold.splitData(0.2)
+    OLS_kfold.scaleData()
+
+    MSE_train_kfold = np.zeros(k_folds)
+    MSE_test_kfold = np.zeros(k_folds)
+
+    train_folds, test_folds = kFoldSplit(OLS_kfold.X_train, OLS_kfold.z_train, k_folds)
+    
+    i = 0
+    for train_indices, test_indices in zip(train_folds, test_folds):
+
+        # get test and train folds
+        X_train_k = OLS_kfold.X_train[train_indices]
+        z_train_k = OLS_kfold.z_train[train_indices]
+
+        X_test_k = OLS_kfold.X_train[test_indices]
+        z_test_k = OLS_kfold.z_train[test_indices]
+
+        # fit and predict
+        beta = np.linalg.pinv(X_train_k) @ z_train_k
+        z_tilde = X_train_k @ beta
+        z_predict = X_test_k @ beta
+
+        # add results
+        MSE_train_kfold[i] = Analysis.MSE(z_train_k, z_tilde)
+        MSE_test_kfold[i] = Analysis.MSE(z_test_k, z_predict)
+        i += 1
+
+    average_mse_test = np.mean(MSE_test_kfold)
+    average_mse_train = np.mean(MSE_train_kfold)
+
+    return average_mse_test, average_mse_train
 
 
 def bootstrap(x, y, z, degree, bootstraps):
@@ -93,11 +154,11 @@ def bootstrap(x, y, z, degree, bootstraps):
     for i in range(bootstraps):
 
         # get random indices
-        randomIndices = np.random.randint(0, samples, samples)
+        random_indices = np.random.randint(0, samples, samples)
 
         # draw samples
-        X_train_boot = OLS_boot.X_train[randomIndices]
-        z_train_boot = OLS_boot.z_train[randomIndices]
+        X_train_boot = OLS_boot.X_train[random_indices]
+        z_train_boot = OLS_boot.z_train[random_indices]
 
         # fit and predict
         beta = np.linalg.pinv(X_train_boot) @ z_train_boot
@@ -124,11 +185,48 @@ def bootstrap(x, y, z, degree, bootstraps):
 
     return mse, mse_train, bias, variance, beta_average, beta_variance
 
+def partC(N, noise, p, k_folds, compare=False, bootstraps=50):
 
+    x, y = generateData(N)
+    z = frankeFunction(x, y, noise)
 
-def partB(N, noise, p, k, plot_bias_variance):
+    MSE_test_scores = np.zeros(p)
+    MSE_train_scores = np.zeros(p)
 
-    MSE_scores = np.zeros(p)
+    MSE_test_scores_boot = np.zeros(p)
+
+    for degree in range(1, p + 1):
+        mse, mse_train = kFoldCrossValidation(x, y, z, degree, k_folds)
+        MSE_test_scores[degree - 1] = mse
+        MSE_train_scores[degree - 1] = mse_train
+
+        if compare:
+            mse, mse_train, bias, variance, beta_average, beta_variance = bootstrap(x, y, z, degree, bootstraps)
+            MSE_test_scores_boot[degree - 1] = mse
+    
+    if compare:
+        Analysis.plot_bootstrap_vs_kfold(MSE_test_scores,
+                                         MSE_test_scores_boot,
+                                         N,
+                                         noise,
+                                         p,
+                                         "kfold_vs_bootstrap_Bootstraps=" + str(bootstraps) + 
+                                         ",KFolds=" + str(k_folds))
+
+    else:
+        Analysis.plot_mse_vs_complexity(MSE_train_scores,
+                                        MSE_test_scores,
+                                        N,
+                                        noise,
+                                        p,
+                                        "kfold_mse_vs_complexity_KFolds=" + str(k_folds))
+    
+
+        
+
+def partB(N, noise, p, bootstraps, plot_bias_variance):
+
+    MSE_test_scores = np.zeros(p)
     MSE_train_scores = np.zeros(p)
     Bias = np.zeros(p)
     Variance = np.zeros(p)
@@ -138,8 +236,8 @@ def partB(N, noise, p, k, plot_bias_variance):
 
     for degree in range(1, p + 1):
         
-        mse, mse_train, bias, variance, beta_average, beta_variance = bootstrap(x, y, z, degree, k)
-        MSE_scores[degree - 1] = mse
+        mse, mse_train, bias, variance, beta_average, beta_variance = bootstrap(x, y, z, degree, bootstraps)
+        MSE_test_scores[degree - 1] = mse
         MSE_train_scores[degree - 1] = mse_train
         Bias[degree - 1] = bias
         Variance[degree - 1] = variance
@@ -147,19 +245,19 @@ def partB(N, noise, p, k, plot_bias_variance):
 
     if not plot_bias_variance:
         Analysis.plot_mse_vs_complexity(MSE_train_scores, 
-                                        MSE_scores, 
+                                        MSE_test_scores, 
                                         N, 
                                         noise, 
                                         p, 
-                                        "bootstrapped_mse_vs_complexity_Bootstraps=" + str(k))
+                                        "bootstrapped_mse_vs_complexity_Bootstraps=" + str(bootstraps))
     else:
-        Analysis.plot_error_bias_variance_vs_complexity(MSE_scores, 
+        Analysis.plot_error_bias_variance_vs_complexity(MSE_test_scores, 
                                                         Bias, 
                                                         Variance, 
                                                         N, 
                                                         noise, 
                                                         p, 
-                                                        "bias_variance_tradeoff_Bootstraps=" + str(k))
+                                                        "bias_variance_tradeoff_Bootstraps=" + str(bootstraps))
 
 
 def partA(N, noise, p):
@@ -168,13 +266,13 @@ def partA(N, noise, p):
     R2_train_scores = np.zeros(p)
     #Betas = np.zeros((p, p))
 
-    MSE_test_scores = []
-    R2_test_scores = []
+    MSE_test_scores = np.zeros(p)
+    R2_test_scores = np.zeros(p)
 
     x, y = generateData(N)
     z = frankeFunction(x, y, noise)
 
-    '''
+    
     for degree in range(1, p + 1):
         DesignMatrix = computeDesignMatrix(x, y, degree)
 
@@ -186,31 +284,41 @@ def partA(N, noise, p):
         OLS.predict()
         OLS.predict(test=True)
 
-        MSE_train_scores[degree - 1] = Analysis.MSE(OLS.z_train, OLS.z_tilde))
-        R2_train_scores[degree - 1] = Analysis.R2(OLS.z_train, OLS.z_tilde))
+        MSE_train_scores[degree - 1] = Analysis.MSE(OLS.z_train, OLS.z_tilde)
+        R2_train_scores[degree - 1] = Analysis.R2(OLS.z_train, OLS.z_tilde)
         #Betas[:, degree - 1] = OLS.beta
 
-        MSE_test_scores.append(Analysis.MSE(OLS.z_test, OLS.z_predict))
-        R2_test_scores.append(Analysis.R2(OLS.z_test, OLS.z_predict))
-    '''
+        MSE_test_scores[degree - 1] = Analysis.MSE(OLS.z_test, OLS.z_predict)
+        R2_test_scores[degree - 1] = Analysis.R2(OLS.z_test, OLS.z_predict)
 
-    DesignMatrix = computeDesignMatrix(x, y, p)
-
-    Analysis.plot_confidence_intervals(DesignMatrix, z, p)
-
-    '''
+        Analysis.plot_confidence_intervals(OLS, degree)
+    
+    
     Analysis.plot_mse_vs_complexity(MSE_train_scores, 
                                     MSE_test_scores, 
                                     N, 
                                     noise, 
                                     p, 
                                     "mse_vs_complexity")
-    '''
+    
 
-N = int(sys.argv[1])
-noisy = float(sys.argv[2])
-poly_degree = int(sys.argv[3])
-#bootstraps = int(sys.argv[4])
 
-partA(N, noisy, poly_degree)
-#partB(N, noisy, poly_degree, bootstraps, False)
+
+part = sys.argv[1]
+N = int(sys.argv[2])
+noisy = float(sys.argv[3])
+poly_degree = int(sys.argv[4])
+
+
+if part == 'a':
+    partA(N, noisy, poly_degree)
+
+elif part == 'b':
+    bootstraps = int(sys.argv[5])
+    partB(N, noisy, poly_degree, bootstraps, True)
+
+elif part == 'c':
+    kfolds = int(sys.argv[5])
+    partC(N, noisy, poly_degree, kfolds, compare=True)
+
+
