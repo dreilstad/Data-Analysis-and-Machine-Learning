@@ -2,6 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from regression import Regression
+plt.style.use('seaborn-dark')
 
 PROJECT_ROOT_DIR = "Results" 
 FIGURE_ID = "Results/FigureFiles" 
@@ -52,6 +53,21 @@ class Analysis:
         return np.diagonal(np.linalg.pinv(X)) * variance
 
     @staticmethod
+    def plot_error_bias_variance_vs_lambda(Lambdas, MSE_scores, Bias, Variance, N_data, noise, degree, fig_name):
+
+        plt.plot(np.log10(Lambdas), MSE_scores, label='Error')
+        plt.plot(np.log10(Lambdas), Bias, label='Bias')
+        plt.plot(np.log10(Lambdas), Variance, label='Variance')
+        plt.yscale('log')
+        plt.legend()
+        plt.xlabel(r'$log_{10}$($\lambda$)')
+        plt.ylabel(r'MSE score')
+        plt.grid()
+        plt.tight_layout()
+        save_fig(fig_name + "_N=" + str(N_data) + "_Noise=" + str(noise) + "_Degree=1-" + str(degree))
+        plt.show()
+
+    @staticmethod
     def plot_error_bias_variance_vs_complexity(MSE_scores, Bias, Variance, N_data, noise, degree, fig_name):
 
         plt.plot(np.arange(1, len(MSE_scores) + 1), MSE_scores, label='Error')
@@ -94,6 +110,19 @@ class Analysis:
         save_fig(fig_name + "_N=" + str(N_data) + "_Noise=" + str(noise) + "_Degree=1-" + str(degree))
         plt.show()
 
+    @staticmethod
+    def plot_mse_vs_lambda(Lambdas, MSE_training_scores, MSE_test_scores, N_data, noise, degree, fig_name):
+
+        plt.plot(np.log10(Lambdas), MSE_training_scores, 'r-', label='MSE train - Ridge')
+        plt.plot(np.log10(Lambdas), MSE_test_scores, 'b-', label='MSE test - Ridge')
+        plt.yscale('log')
+        plt.legend()
+        plt.xlabel(r'$log_{10}$($\lambda$)')
+        plt.ylabel(r'MSE score')
+        plt.grid()
+        plt.tight_layout()
+        save_fig(fig_name + "_N=" + str(N_data) + "_Noise=" + str(noise))
+        plt.show()
 
     @staticmethod
     def plot_confidence_intervals(Model, degree):

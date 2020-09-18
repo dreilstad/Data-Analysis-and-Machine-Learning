@@ -2,32 +2,53 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
-class Regression(object):
+class Ridge(object):
 
-    def __init__(self, X, z):
+    def __init__(self, X, z, lmbda):
         
         self.X = X
         self.z = z
+        self.lmbda = lmbda
     
     def beta(self):
         return self.beta
 
+
     def fit(self, *args):
+
         if len(args) == 0:
-            self.beta = np.linalg.pinv(self.X_train) @ self.z_train
+            A = (self.X_train.T @ self.X_train) + np.eye(self.X_train.shape[0]) * self.lmbda
+            self.beta = self.SVD(A) @ self.X_train.T @ self.z_train
             return self.beta
         else:
-            self.beta = np.linalg.pinv(args[0]) @ args[1]
+            X = args[0]
+            z = args[1]
+            A = (X.T @ X) + np.eye(X.shape[0]) * self.lmbda
+            self.beta = self.SVD(A) @ X.T @ z
             return self.beta
-
+    
     def predict(self, test=False):
-
         if not test:
             self.z_tilde = self.X_train @ self.beta
             return self.z_tilde
         else:
             self.z_predict = self.X_test @ self.beta
             return self.z_predict
+
+
+    def SVD(self, X):
+        
+        # decomposition
+        U, s, VT = np.linalg.svd(X)
+        invD = np.zeros((len(U),len(VT)))
+
+        for i in range(0,len(VT)):
+            invD[i,i]=1/s[i]
+
+        UT = np.transpose(U)
+        V = np.transpose(VT)
+
+        return np.matmul(V,np.matmul(invD,UT))
 
     def scaleData(self):
         """
