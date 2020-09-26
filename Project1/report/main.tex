@@ -1,0 +1,196 @@
+%-------------------- begin preamble ----------------------
+
+\documentclass[oneside,10pt]{article}
+
+\usepackage{relsize,makeidx,color,setspace,amsmath,amsfonts,amssymb, mathtools}
+\usepackage[table]{xcolor}
+\usepackage{bm,ltablex,microtype}
+\usepackage{hyperref}
+\usepackage{fontawesome}   
+\usepackage[pdftex]{graphicx}
+\usepackage{tcolorbox}
+
+\DeclarePairedDelimiter\set\{\}
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\y}{\mathbf{y}}
+\newcommand{\ytilde}{\mathbf{\widetilde{y}}}
+\newcommand{\X}{\mathbf{X}}
+\newcommand{\B}{\boldsymbol{\beta}}
+\newcommand{\Bhat}{\boldsymbol{\hat{\beta}}}
+\newcommand{\eps}{\boldsymbol{\varepsilon}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\begin{titlepage}
+    \begin{center}
+        \vspace*{1cm}
+            
+        \Huge
+        \textbf{Regression analysis and resampling methods}
+            
+        \vspace{0.5cm}
+        \LARGE
+        FYS-STK3155 - Project 1
+            
+        \vspace{0.5cm}
+            
+        Didrik Spanne Reilstad
+        
+        \vspace{0.5cm}
+            
+        \includegraphics[width=0.6\textwidth]{terrain.png}
+        
+        
+    \end{center}
+\end{titlepage}
+
+\begin{document}
+\begin{center}
+    \small \textbf{Github}
+    
+    \vspace{0.2cm}
+    
+    \faGithub \ \small \href{https://github.com/dreilstad/FYS-STK3155/tree/master/Project1}{github.com/dreilstad/FYS-STK3155/Project1}
+\end{center}
+\vspace{0.5cm}
+\begin{abstract}
+    Using regression methods
+\end{abstract}
+\section{Introduction}
+Regression analysis is the process of using statistical methods to examine the relationship between a number of independent variables and a dependent variable. The goal of regression analysis is to exploit the resulting model from our regression analysis to make predictions and fit a function to the independent variables. The ability to infer information from the relationship between a set of independent variables and a dependent variable to predict and forecast is an incredibly powerful tool.\\
+\\
+Regression analysis and modeling is widely used in disciplines such as social sciences, epidemiology, finance and economics, and also plays an important role in machine learning. Especially relevant at the time of writing, is regression analysis in the field of epidemiology. Considering the current COVID-19 pandemic, using regression analysis to track the spread of a virus in a population and being able to predict the development of spread is an incredibly powerful tool. In general regression analysis is an important tool used in analytical epidemiology.\cite{epidemiology}\\
+\\
+The focus of this project was to study various regression methods such as Ordinary Least Squares(OLS), Ridge regression and Lasso regression. Furthermore using resampling methods like k-fold cross validation and boostrap in order to evaluate the resulting model from the various regression methods. Code written for OLS and Ridge regression, and also for both of the aforementioned resampling methods is located in the linked Github repository. For Lasso regression, functionality from Scikit-Learn was used. \\
+\\
+The subsequent sections of the project starts with an outline of the theory and method used to produce the results in the present work. Also information about the datasets used in the project is provided. Thereafter the results are presented and discussed. The report is ended with a conclusion.
+\section{Method}
+This sections outlines the theory and method behind the regression analysis presented in the report. Including regression methods, measurements for assessing the models and resampling techniques.
+\subsection{Linear regression}
+Given a set of $p$ independent variables, also called characteristics or features, of $n$ samples organized in a so called design matrix $\X$. In addition where $\y$ is the observable response or outcome. If we assume a linear relationship between the independent variables of $\X$ and the response $\y$, we can fit a model using linear regression. Meaning $\y$ can be written as
+\begin{equation}
+    \y = \X \B + \eps
+\end{equation}
+The design matrix $\X$ is a matrix of size $n\times p$. The response $\y$ is a vector of size $n$ and the parameter vector $\B$ containing the linear regression coefficients $\beta_{i}$ of our model is of size $p$. The coefficients of $\B$ are unknown to us. Lastly, $\eps$ is a vector of size $n$ and represents the error term or disturbance term or sometimes noise of our model. $\eps$ contains the factors which influence the response $\y$ other than the independent variables $\mathbf{x}_{i}$, which are the columns of $\X$. $\eps$ is also assumed to be normally distributed, $\eps \sim N(0,\sigma^{2})$.\\
+\\
+We assume the non-trivial and more realistic situation where the $\eps$ vector contains non-zero values. . Meaning there will be a deviation between our model, denoted by $\ytilde$, and the observed values $\y$. We then write our model as
+\begin{equation}
+    \ytilde &= \X \B
+\end{equation}
+and the error or deviation between our model and the observed values $\y$ can be written as
+\begin{equation}
+\begin{split}
+    \eps &= \y - \X \B \\
+    &= \y - \ytilde
+\end{split}
+\end{equation}
+We want to our error to be as small as possible, meaning that our model most accurately models our data. Estimating the coefficents of $\B$ such that $\eps$ is minimized, is the goal of linear regression.
+\subsection{Ordinary Least Squares}
+To estimate the unknown coefficients of $\B$ such that $\eps$ is minimized, we require an expression for $\B$. Using the Mean Squared Error (MSE) with the Euclidean $L^{2}$ norm for a vector space, we can write the cost function as
+\begin{align*}
+    C(\B) &= \norm{\y - \ytilde}_{2}^{2}\\
+    &= \frac{1}{n}\sum_{i=0}^{n - 1} (y_{i} - \widetilde{y_{i}})^{2}\\
+    &= \frac{1}{n}\set*{(\y - \ytilde)^{T}(\y - \ytilde)}\\
+    &= \frac{1}{n}\set{(\y - \X\B)^{T}(\y - \X\B)}\numberthis\label{eqn}
+\end{align*}
+The optimal coefficients of $\B$, which we denote as $\Bhat$, is therefore
+\begin{align}
+    \Bhat^{OLS} = \underset{\beta}{argmin} \ C(\B)
+\end{align}
+In order to minimize $C(\B)$, we can differentiate the function with respect to $\B$ and set the result equal zero. We can omit the constant $\frac{1}{n}$, since it will ultimately be multiplied away. Differentiating results in
+\begin{align*}
+    \frac{\partial C(\B)}{\partial \B} &= \frac{\partial}{\partial \B}\left((\y - \X\B)^{T}(\y - \X\B)\right)\\
+    &= \X^{T}(\y - \X\B) = 0
+\end{align*}
+and rewriting the equation yields the ordinary least squares estimator
+\begin{align*}
+    \X^{T}\y &= \X^{T}\X\B\\
+    \Bhat^{OLS} &= \left(\X^{T}\X\right)^{-1}\X^{T}\y \numberthis\label{eqn}
+\end{align*}
+Equation (6), if the product $\X^{T}\X$ is invertible, provides the optimal coefficients. In section 2.1, the design matrix was defined as $\X \in \R^{n\times p}$ where $n$ samples can become quite large in our dataset because it is usually the case that $n \gg p$. Thankfully and important to note is that the product $\X^{T}\X \in \R^{p \times p}$, is much less computationally intensive to invert seeing as $p$ normally is relatively small.\\
+\\
+Using the result from equation (6), we can calculate our model with equation (2)
+\begin{align*}
+    \ytilde = \X\Bhat\numberthis\label{eqn}
+\end{align*}
+$\ytilde$ is our model of predicted values.
+\subsection{Ridge regression}
+Ridge regression is similar to OLS by way of obtaining the coefficients of $\B$, but for ridge regression a regularization parameter $\lambda$ is added. The cost function for ridge regression then becomes
+\begin{align*}
+    C(\B) &= \norm{\y - \ytilde}_{2}^{2} + \lambda\norm{\B}_{2}^{2}\\
+    &= \norm{\y - \X\B}_{2}^{2} + \lambda\norm{\B}_{2}^{2}\\
+    &= \frac{1}{n}\set{(\y - \X\B)^{T}(\y - \X\B)} + \lambda\B^{T}\B \numberthis\label{eqn}
+\end{align*}
+Similarly to OLS, we differentiate with respect to $\B$. Resulting in an expression for the optimal values of $\B^{Ridge}$.
+\begin{align*}
+    \frac{\partial C(\B)}{\partial \B} &= \frac{\partial}{\partial \B}\left((\y - \X\B)^{T}(\y - \X\B) + \lambda\B^{T}\B\right)\\
+    &= \X^{T}(\y - \X\B) + \lambda\B = 0
+\end{align*}
+and rewriting yields the ridge estimator
+\begin{align*}
+    \X^{T}\y &= \X^{T}\X\B + \lambda\B\\
+    \X^{T}\y &= (\X^{T}\X + \lambda \mathbf{I})\B\\
+    \Bhat^{Ridge} &= \left(\X^{T}\X + \lambda \mathbf{I}\right)^{-1}\X^{T}\y \numberthis\label{eqn}
+\end{align*}
+where $\mathbf{I}$ is the identity matrix. With the constraints
+\begin{align*}
+    \lambda &\geq 0\\
+    \sum_{i=0}^{p-1}\beta_{i}^{2} &\leq t
+\end{align*}
+where $t$ is a finite positive number. Also notice that for $\lambda = 0$, the estimator becomes an OLS estimator. \\
+\\
+OLS simply finds the unbiased coefficents of $\B$, meaning every feature (column) of the design matrix $\X$ is evaluated equally. The method does not consider if a number of the features are more important than the others. For ridge regression on the other hand you are able to tune the regularization parameter $\lambda$, which will lead to different coefficients. Ridge regression shrinks the coordinates $\y$. To better understand why this is the case, we must first introduce Singular Value Decomposition (SVD).
+\subsubsection{Singular Value Decomposition}
+In the situation where the product $\X^{T}\X$ is non-invertible, meaning that the columns of $\X$ are linearly dependent and therefore we have no solution to equation (6), we have the option of computing the pseudo-inverse matrix using the Singular Value Decomposition algorithm.\\
+\\
+From the textbook \textit{Linear Algebra and its Applications} by David C. Lays, et al. \cite{linalg}:
+\begin{tcolorbox}[colback=blue!8]
+\textbf{Singular Value Decomposition}\\
+Let $A$ be an $m \times n$ matrix with rank $r$. Then there exist an $m \times n$ matrix $\Sigma$ for which the first $r$ diagonal entries are the singular values of A, $\sigma_{1} \geq \sigma_{2} \geq$ ... $\geq \sigma_{r} > 0$, and there exists an $m \times m$ orthogonal matrix $U$ and an $n\times n$ orthogonal matrix $V$ such that 
+$$
+A = U\Sigma V^{T}
+$$
+\end{tcolorbox}
+\noindent The singular values of $A$ are the square root of the eigenvalues of $A^{T}A$. The columns of matrix $U$ are the eigenvectors of the product $A^{T}A$. While the columns of matrix $V$ are the eigenvectors of the product $AA^{T}$. The columns of $U$ forms an orthonormal basis for Col(A) and the columns of $V$ form an orthonormal basis for Row(A). Because $U$ and $V$ are orthogonal we can use in the following section the properties, $U^{T}U=I$ and $VV^{T}=I$.
+\subsubsection{OLS and ridge regression with SVD}
+Applying SVD to $\X^{T}\X$, where $\X = \mathbf{U\Sigma V}^{T}$, we get teh following
+\begin{align*}
+    \X^{T}\X &= (\mathbf{U\Sigma V}^{T})^{T}(\mathbf{U\Sigma V}^{T})\\
+    &= \mathbf{V\Sigma}^{T}\mathbf{U}^{T}\mathbf{U\Sigma V}^{T}\\
+    &= \mathbf{V}\mathbf{\Sigma}^{2}\mathbf{V}^{T}\numberthis\label{eqn}
+\end{align*}
+Combining equation (6), (7) and (10), we get for OLS
+\begin{align*}
+    \ytilde^{OLS} &= \X\Bhat = \X\left(\X^{T}\X\right)^{-1}\X^{T}\y\\
+    \ytilde^{OLS} &= \mathbf{U\Sigma V}^{T}(\mathbf{V}\mathbf{\Sigma}^{2}\mathbf{V}^{T})^{-1}(\mathbf{U\Sigma V}^{T})^{T}\y\\
+    \ytilde^{OLS} &= \mathbf{UU}^{T}\y = \sum_{j=1}^{p}\mathbf{u}_{j}\mathbf{u}_{j}^{T}\y \numberthis\label{eqn}
+\end{align*}
+Now doing the same for ridge regression, we get
+\begin{align*}
+        \ytilde^{Ridge} &= \X\Bhat = \X\left(\X^{T}\X + \lambda \mathbf{I}\right)^{-1}\X^{T}\y\\
+    \ytilde^{Ridge} &= \mathbf{U\Sigma V}^{T}(\mathbf{V}\mathbf{\Sigma}^{2}\mathbf{V}^{T} + \lambda\mathbf{I})^{-1}(\mathbf{U\Sigma V}^{T})^{T}\y\\
+    \ytilde^{Ridge} &= \mathbf{UU}^{T}\y = \sum_{j=1}^{p}\mathbf{u}_{j}\frac{\mathbf{\sigma}_{j}^{2}}{\mathbf{\sigma}_{j}^{2} + \lambda}\mathbf{u}_{j}^{T}\y \numberthis\label{eqn}
+\end{align*}
+Since $\lambda \geq 0$, we must have
+\begin{align*}
+    \frac{\mathbf{\sigma}_{j}^{2}}{\mathbf{\sigma}_{j}^{2} + \lambda} \leq 1 \numberthis\label{eqn}
+\end{align*}
+As mentioned previously, ridge regression shrinks the coordinates of $\y$. Comparing equation (11) and (12), we can se that ridge regression shrinks $\y$ with respect to the orthonormal basis $\mathbf{U}$ by a factor of $\frac{\mathbf{\sigma}_{j}^{2}}{\mathbf{\sigma}_{j}^{2} + \lambda}$. Recalling from the section about SVD, that the square root of the eigenvalues are ordered diagonally in a descending order such that $\sigma_{i} \geq \sigma_{i+1}$. $\sigma_{i}$ with smaller values are less important because they contribute less to $\y$ and are therefore applied more shrinkage than $\sigma_{i}$ with larger values. Essentially this means that ridge regression shrinks the coordinates of $\y$, but shrinks the features that are less important than the features which are more important.
+\subsection{Lasso regression}
+\subsection{Design Matrix}
+\section{Datasets}
+ 
+\section{Results}
+
+\section{Discussion}
+
+\section{Conclusion}
+
+
+\begin{thebibliography}{9}
+\bibitem{epidemiology}
+Bender, R. (2009). Introduction to the use of regression models in epidemiology. Methods in molecular biology (Clifton, N.J.), 471, 179–195. https://pubmed.ncbi.nlm.nih.gov/19109780/
+
+\bibitem{linalg}
+Lay, David C., et al. Linear Algebra and its Applications, Global Edition. Pearson. (2018).
+\end{thebibliography}
+\end{document}
