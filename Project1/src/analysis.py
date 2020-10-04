@@ -52,16 +52,17 @@ class Analysis:
     @staticmethod
     def plot_error_bias_variance_vs_complexity(MSE_scores, Bias, Variance, N_data, noise, degree, fig_name):
 
-        plt.plot(np.arange(1, len(MSE_scores) + 1), MSE_scores, label='Error')
-        plt.plot(np.arange(1, len(Bias) + 1), Bias, label='Bias')
-        plt.plot(np.arange(1, len(Variance) + 1), Variance, label='Variance')
+        plt.plot(np.arange(1, len(MSE_scores) + 1), MSE_scores, label=r'$Error$')
+        plt.plot(np.arange(1, len(Bias) + 1), Bias, label=r'$Bias^{2}$')
+        plt.plot(np.arange(1, len(Variance) + 1), Variance, label=r'$Variance$')
+        #plt.plot(np.arange(1, len(Variance) + 1), Bias + Variance, linestyle='--', label=r'$Bias^{2} + Variance$')
         plt.yscale('log')
         plt.legend()
         plt.xlabel(r'Complexity of model (degree of polynomial)')
         plt.ylabel(r'MSE score')
         plt.grid()
         plt.tight_layout()
-        #save_fig(fig_name + "_N=" + str(N_data) + "_Noise=" + str(noise) + "_Degree=1-" + str(degree))
+        save_fig(fig_name + "_N=" + str(N_data) + "_Noise=" + str(noise) + "_Degree=1-" + str(degree))
         plt.show()
 
     @staticmethod
@@ -73,6 +74,19 @@ class Analysis:
         plt.legend()
         plt.xlabel(r'Complexity of model (degree of polynomial)')
         plt.ylabel(r'MSE score')
+        plt.grid()
+        plt.tight_layout()
+        save_fig(fig_name + "_N=" + str(N_data) + "_Noise=" + str(noise) + "_Degree=1-" + str(degree))
+        plt.show()
+
+    @staticmethod
+    def plot_r2_vs_complexity(R2_training_scores, R2_test_scores, N_data, noise, degree, fig_name):
+
+        plt.plot(np.arange(1, len(R2_training_scores) + 1), R2_training_scores, 'r-', label='R2 train')
+        plt.plot(np.arange(1, len(R2_test_scores) + 1), R2_test_scores, 'b-', label='R2 test')
+        plt.legend()
+        plt.xlabel(r'Complexity of model (degree of polynomial)')
+        plt.ylabel(r'R2 score')
         plt.grid()
         plt.tight_layout()
         save_fig(fig_name + "_N=" + str(N_data) + "_Noise=" + str(noise) + "_Degree=1-" + str(degree))
@@ -127,25 +141,22 @@ class Analysis:
 
 
     @staticmethod
-    def plot_confidence_intervals(Model, degree):
+    def plot_confidence_intervals(betas, confidence_interval, N_data, noise, degree, fig_name):
         """
         Function for finding the estimated confidence intervals of a given models beta-parameters,
         and makes a plot of the parameters with confidence intervals corresponing to
         a 95% confidence interval.
         """
 
-        beta = Model.beta
-        variance_beta = beta_coeff_variance(Model.X_test, Model.z, Model.z_predict)
-        confidence_interval = 1.96 * np.sqrt(variance_beta)
+        plt.scatter(np.arange(len(betas)), betas)
+        plt.errorbar(np.arange(len(betas)), betas, yerr=confidence_interval, lw=1, fmt='none', capsize=3)
 
-
-        plt.errorbar(np.arange(len(beta)), beta, confidence_interval, fmt="b.", capsize=3, label=r'$\beta_j \pm 1.96 \sigma$')
-        plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
         plt.legend()
-        plt.xlabel(r'index $j$')
-        plt.ylabel(r'$\beta_j$')
+        plt.xlabel(r'$\beta_j$')
+        plt.ylabel(r'$\beta_j value$')
         plt.grid()
-        save_fig("confidence_interval_beta_Degree=1-" + str(degree))
+        plt.tight_layout()
+        save_fig(fig_name + "_N=" + str(N_data) + "_Noise=" + str(noise) + "_Degree=" + str(degree))
         plt.show()
 
     @staticmethod
@@ -164,7 +175,7 @@ class Analysis:
         plt.show()
 
     @staticmethod
-    def plot_lambda_vs_complexity(R2_scores, degrees, lambdas, fig_name):
+    def plot_lambda_vs_complexity(R2_scores, degrees, lambdas, N_data, noise, fig_name, method):
 
         heatmap = sns.heatmap(R2_scores, 
                               annot=True,
@@ -173,18 +184,26 @@ class Analysis:
                               yticklabels=degrees, 
                               linewidths=0.5, 
                               annot_kws={"fontsize":8}, 
-                              vmin=np.min(R2_scores), 
+                              vmin=0.5, 
                               vmax=1)
 
 
         plt.xlabel(r'$log_{10}$($\lambda$)')
         plt.ylabel(r'Complexity of model (degree of polynomial)')
-        plt.title(r'Ridge regression - R2 score')
+        if method == 'Ridge':
+            plt.title(r'Ridge regression - R2 score')
+        else:
+            plt.title(r'Lasso regression - R2 score')
+
         plt.tight_layout()
+        save_fig(fig_name + "_N=" + str(N_data) + "_Noise=" + str(noise) + "_Degree=1" + str(degrees[-1]))
         plt.show()
 
     @staticmethod
     def plot_ols_ridge_lasso(MSE_train_scores, MSE_test_scores, N_data, noise, degrees, fig_name):
+
+
+        
 
         plt.plot(degrees, MSE_train_scores[0], linestyle='--', color='red', label='OLS - Train')
         plt.plot(degrees, MSE_test_scores[0], linestyle='-', color='red', label='OLS - Test')

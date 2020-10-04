@@ -7,26 +7,31 @@ from analysis import Analysis
 from resampling import Bootstrap, CrossValidation
 from tools import generateData, frankeFunction, computeDesignMatrix
 
-def lambdaVsComplexity(x, y, z, poly_degrees, bootstraps):
+def lambdaVsComplexity(x, y, z, poly_degrees, noise, kfolds, method):
 
-    R2_test_scores = np.zeros((poly_degrees, poly_degrees))
-    
-    lambdas = np.logspace(-10, poly_degrees - 11, poly_degrees)
+    lambdas = np.logspace(-11, -2, 10)
     degrees = np.arange(1, poly_degrees + 1)
+
+    R2_test_scores = np.zeros((poly_degrees, len(lambdas)))
 
     i = 0
     for degree in degrees:
         j = 0
         for lmbda in lambdas:
-            result = Bootstrap.bootstrap(x, y, z, degree, bootstraps, 'Ridge', lmbda=lmbda)
-            R2 = result[2]
-            R2_test_scores[i][j] = R2
+            mse, mse_train, r2 = CrossValidation.kFoldCrossValidation(x, y, z, degree, kfolds, method, lmbda=lmbda)
+            R2_test_scores[i][j] = r2
 
             j += 1
 
         i += 1
 
-    Analysis.plot_lambda_vs_complexity(R2_test_scores, degrees, lambdas, 'lambda_vs_complexity_heatmap')
+    Analysis.plot_lambda_vs_complexity(R2_test_scores, 
+                                       degrees, 
+                                       lambdas, 
+                                       len(z), 
+                                       noise, 
+                                       'lambda_vs_complexity_heatmap_'+ method, 
+                                       method)
 
 def betaConfidenceIntervalsVsLambda(x, y, z, poly_degrees):
     lambdas = np.logspace(-10, -6, 4)
@@ -62,7 +67,6 @@ def betaConfidenceIntervalsVsLambda(x, y, z, poly_degrees):
     Analysis.plot_beta_ci_vs_lambda(Betas, Confidence_intervals, lambdas)
 
 def biasVariance(x, y, z, noise, poly_degrees, bootstraps, lmbda):
-    #lambdas = np.logspace(-10, 5, 17)
 
     MSE_test_scores = np.zeros(poly_degrees)
     Bias = np.zeros(poly_degrees)
@@ -70,10 +74,10 @@ def biasVariance(x, y, z, noise, poly_degrees, bootstraps, lmbda):
     
     for degree in range(1, poly_degrees + 1):
 
-        mse, mse_train, R2, bias, variance, beta_average, beta_variance = Bootstrap.bootstrap(x, y, z, degree, bootstraps, 'Ridge', lmbda=lmbda)
-        MSE_test_scores[degree - 1] = mse
-        Bias[degree - 1] = bias
-        Variance[degree - 1] = variance
+        result = Bootstrap.bootstrap(x, y, z, degree, bootstraps, 'Ridge', lmbda=lmbda)
+        MSE_test_scores[degree - 1] = result[0]
+        Bias[degree - 1] = result[3]
+        Variance[degree - 1] = result[4]
 
 
     Analysis.plot_error_bias_variance_vs_complexity(MSE_test_scores, 
@@ -82,7 +86,8 @@ def biasVariance(x, y, z, noise, poly_degrees, bootstraps, lmbda):
                                                     N, 
                                                     noise, 
                                                     poly_degrees, 
-                                                    "bias_variance_tradeoff_Bootstraps=" + str(bootstraps))
+                                                    'bias_variance_tradeoff_Lambda=' + str(lmbda) + 
+                                                    '_Bootstraps=' + str(bootstraps))
 
 def crossValidation(x, y, z, noise, poly_degrees, bootstraps, kfolds, lmbda, compare=False):
 
@@ -125,7 +130,8 @@ def partD(N, noise, poly_degrees, plot, bootstraps=0, kfolds=0, lmbda=0.0):
 
 
     if plot == 'lambda_vs_complexity':
-        lambdaVsComplexity(x, y, z, poly_degrees, bootstraps)
+        lambdaVsComplexity(x, y, z, poly_degrees, noise,  10, 'Ridge')
+        lambdaVsComplexity(x, y, z, poly_degrees, noise, 10, 'Lasso')
 
     elif plot == 'beta_ci_vs_lambda':
         betaConfidenceIntervalsVsLambda(x, y, z, poly_degrees)
@@ -141,13 +147,10 @@ def partD(N, noise, poly_degrees, plot, bootstraps=0, kfolds=0, lmbda=0.0):
 N = int(sys.argv[1])
 noise = float(sys.argv[2])
 degree = int(sys.argv[3])
-bootstraps_or_kfolds = int(sys.argv[4])
+bootstraps = int(sys.argv[4])
 plot = int(sys.argv[5])
 lmbda = int(sys.argv[6])
 
-lambdas = [1e-10, 1e-8, 1e-6, 1e-4, 1e-2, 1e0, 1e2, 1e4, 1e6]
+lambdas = [1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
 plots = ['lambda_vs_complexity', 'beta_ci_vs_lambda', 'ridge_bias_variance', 'ridge_cross_validation']
-if plot < 3:
-    partD(N, noise, degree, plots[plot], bootstraps=bootstraps_or_kfolds)
-else:
-    partD(N, noise, degree, plots[plot], kfolds=bootstraps_or_kfolds, lmbda=lambdas[lmbda])
+partD(N, noise, degree, plots[plot], bootstraps=bootstraps, lmbda=lambdas[lmbda])

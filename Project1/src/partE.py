@@ -13,7 +13,7 @@ def lambdaVsComplexity(x, y, z, poly_degrees, bootstraps):
 
     R2_test_scores = np.zeros((poly_degrees, poly_degrees))
     
-    lambdas = np.logspace(-10, poly_degrees - 11, poly_degrees)
+    lambdas = np.logspace(-11, -2, 10)
     degrees = np.arange(1, poly_degrees + 1)
 
     i = 0
@@ -58,7 +58,6 @@ def betaConfidenceIntervalsVsLambda(x, y, z, poly_degrees):
     Analysis.plot_beta_ci_vs_lambda(Betas, Confidence_intervals, lambdas)
 
 def biasVariance(x, y, z, noise, poly_degrees, bootstraps, lmbda):
-    #lambdas = np.logspace(-10, 5, 17)
 
     MSE_test_scores = np.zeros(poly_degrees)
     Bias = np.zeros(poly_degrees)
@@ -66,10 +65,10 @@ def biasVariance(x, y, z, noise, poly_degrees, bootstraps, lmbda):
     
     for degree in range(1, poly_degrees + 1):
 
-        mse, mse_train, R2, bias, variance, beta_average, beta_variance = Bootstrap.bootstrap(x, y, z, degree, bootstraps, 'Lasso', lmbda=lmbda)
-        MSE_test_scores[degree - 1] = mse
-        Bias[degree - 1] = bias
-        Variance[degree - 1] = variance
+        result = Bootstrap.bootstrap(x, y, z, degree, bootstraps, 'Lasso', lmbda=lmbda)
+        MSE_test_scores[degree - 1] = result[0]
+        Bias[degree - 1] = result[3]
+        Variance[degree - 1] = result[4]
 
 
     Analysis.plot_error_bias_variance_vs_complexity(MSE_test_scores, 
@@ -78,7 +77,8 @@ def biasVariance(x, y, z, noise, poly_degrees, bootstraps, lmbda):
                                                     N, 
                                                     noise, 
                                                     poly_degrees, 
-                                                    "bias_variance_tradeoff_Bootstraps=" + str(bootstraps))
+                                                    'bias_variance_tradeoff_Lambda=' + str(lmbda) + 
+                                                    '_Bootstraps=' + str(bootstraps))
 
 def crossValidation(x, y, z, noise, poly_degrees, bootstraps, kfolds, lmbda, compare=False):
 
@@ -114,7 +114,7 @@ def crossValidation(x, y, z, noise, poly_degrees, bootstraps, kfolds, lmbda, com
                                         poly_degrees,
                                         "kfold_mse_vs_complexity_KFolds=" + str(kfolds))
 
-def compareAll(x, y, z, noise, N, poly_degrees, lmbda):
+def compareAll(x, y, z, noise, N, poly_degrees, kfolds, lmbda):
 
     degrees = np.arange(1, poly_degrees + 1)
 
@@ -128,40 +128,19 @@ def compareAll(x, y, z, noise, N, poly_degrees, lmbda):
     MSE_lasso_train = np.zeros(poly_degrees)
 
     for degree in degrees:
-        DesignMatrix = computeDesignMatrix(x, y, degree)
 
-        OLS = Regression(DesignMatrix, z)
-        RIDGE = Ridge(DesignMatrix, z, lmbda)
-        LASSO = Lasso(DesignMatrix, z, lmbda)
+        ols_test, ols_train, ols_r2 = CrossValidation.kFoldCrossValidation(x, y, z, degree, kfolds, 'OLS')
+        ridge_test, ridge_train, ridge_r2 = CrossValidation.kFoldCrossValidation(x, y, z, degree, kfolds, 'Ridge', lmbda=lmbda) 
+        lasso_test, lasso_train, lasso_r2 = CrossValidation.kFoldCrossValidation(x, y, z, degree, kfolds, 'Lasso', lmbda=lmbda)
 
-        OLS.splitData(0.2)
-        RIDGE.splitData(0.2)
-        LASSO.splitData(0.2)
+        MSE_ols_test[degree - 1] = ols_test
+        MSE_ols_train[degree - 1] = ols_train
 
-        OLS.scaleData()
-        RIDGE.scaleData()
-        LASSO.scaleData()
+        MSE_ridge_test[degree - 1] = ridge_test
+        MSE_ridge_train[degree - 1] = ridge_train
 
-        OLS.fit()
-        RIDGE.fit()
-        LASSO.fit()
-
-        OLS.predict()
-        RIDGE.predict()
-        LASSO.predict()
-
-        OLS.predict(test=True)
-        RIDGE.predict(test=True)
-        LASSO.predict(test=True)
-
-        MSE_ols_test[degree - 1] = Analysis.MSE(OLS.z_test, OLS.z_predict)
-        MSE_ols_train[degree - 1] = Analysis.MSE(OLS.z_train, OLS.z_tilde)
-
-        MSE_ridge_test[degree - 1] = Analysis.MSE(RIDGE.z_test, RIDGE.z_predict)
-        MSE_ridge_train[degree - 1] = Analysis.MSE(RIDGE.z_train, RIDGE.z_tilde)
-
-        MSE_lasso_test[degree - 1] = Analysis.MSE(LASSO.z_test, LASSO.z_predict)
-        MSE_lasso_train[degree - 1] = Analysis.MSE(LASSO.z_train, LASSO.z_tilde)
+        MSE_lasso_test[degree - 1] = lasso_test
+        MSE_lasso_train[degree - 1] = lasso_train
     
 
     train_scores = [MSE_ols_train, MSE_ridge_train, MSE_lasso_train]
@@ -176,10 +155,10 @@ def compareAll(x, y, z, noise, N, poly_degrees, lmbda):
 
 
 
-def partE(N, noise, poly_degrees, plot, bootstraps=50, kfolds=10, lmbda=0.0):
+def partE(N, noise, poly_degrees, plot, bootstraps, lmbda=0.0):
 
     x, y = generateData(N)
-    z = frankeFunction(x, y, noise)
+    z = frankeFunction(x, y, noise=noise)
 
 
     if plot == 'lambda_vs_complexity':
@@ -193,9 +172,9 @@ def partE(N, noise, poly_degrees, plot, bootstraps=50, kfolds=10, lmbda=0.0):
 
     elif plot == 'lasso_cross_validation':
         #crossValidation(x, y, z, noise, poly_degrees, bootstraps, kfolds, lmbda)
-        crossValidation(x, y, z, noise, poly_degrees, 50, kfolds, lmbda, compare=True)
+        crossValidation(x, y, z, noise, poly_degrees, 50, 10, lmbda, compare=True)
     elif plot == 'compare_all':
-        compareAll(x, y, z, noise, N, poly_degrees, lmbda)
+        compareAll(x, y, z, noise, N, poly_degrees, 10, lmbda)
 
 
 
@@ -209,4 +188,4 @@ lambdas = [1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
 plots = ['lambda_vs_complexity', 'beta_ci_vs_lambda', 'lasso_bias_variance', 'lasso_cross_validation', 'compare_all']
 
 #partE(N, noise, degree, plots[plot], bootstraps=bootstraps_or_kfolds)
-partE(N, noise, degree, plots[plot], lmbda=lambdas[lmbda])
+partE(N, noise, degree, plots[plot], 50, lmbda=lambdas[lmbda])

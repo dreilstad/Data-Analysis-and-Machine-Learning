@@ -61,5 +61,10 @@ class Regression(object):
         self.z_test = z_test
 
 
-    
+    def beta_coeff_variance(self):
+        N, p = self.X_test.shape
+        variance = (1/(N-p-1))*sum((self.z_test - self.z_predict)**2)
+
+        beta_coeff_variance = np.diagonal(np.linalg.pinv(self.X_test.T @ self.X_test)) * variance
+        return beta_coeff_variance
     

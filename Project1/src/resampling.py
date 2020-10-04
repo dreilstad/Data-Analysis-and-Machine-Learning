@@ -106,7 +106,7 @@ class CrossValidation(object):
         """
 
         if N_data % folds != 0:
-            print("Not able to divide dataset in k = " + str(k) + " folds evenly!")
+            print("Not able to divide dataset in k = " + str(folds) + " folds evenly!")
             exit(1)
 
         len_fold = N_data//folds

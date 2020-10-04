@@ -17,29 +17,31 @@ def partA(N, noise, poly_degree):
     x, y = generateData(N)
     z = frankeFunction(x, y, noise)
 
-    print(z.shape)
-    exit(0)
-
+    degrees = np.arange(1, poly_degree + 1)
     
-    for degree in range(1, poly_degree + 1):
+    for degree in degrees:
+
         DesignMatrix = computeDesignMatrix(x, y, degree)
 
+        MODEL = Regression(DesignMatrix, z)
+        MODEL.splitData(0.2)
+        MODEL.scaleData()
+        MODEL.fit()
+        MODEL.predict()
+        MODEL.predict(test=True)
 
-        OLS = Regression(DesignMatrix, z)
-        OLS.splitData(0.2)
-        OLS.scaleData()
-        OLS.fit()
-        OLS.predict()
-        OLS.predict(test=True)
+        MSE_train_scores[degree - 1] = Analysis.MSE(MODEL.z_train, MODEL.z_tilde)
+        R2_train_scores[degree - 1] = Analysis.R2(MODEL.z_train, MODEL.z_tilde)
 
-        MSE_train_scores[degree - 1] = Analysis.MSE(OLS.z_train, OLS.z_tilde)
-        R2_train_scores[degree - 1] = Analysis.R2(OLS.z_train, OLS.z_tilde)
-        #Betas[:, degree - 1] = OLS.beta
+        MSE_test_scores[degree - 1] = Analysis.MSE(MODEL.z_test, MODEL.z_predict)
+        R2_test_scores[degree - 1] = Analysis.R2(MODEL.z_test, MODEL.z_predict)
 
-        MSE_test_scores[degree - 1] = Analysis.MSE(OLS.z_test, OLS.z_predict)
-        R2_test_scores[degree - 1] = Analysis.R2(OLS.z_test, OLS.z_predict)
 
-        #Analysis.plot_confidence_intervals(OLS, degree)
+        std_beta = np.sqrt(MODEL.beta_coeff_variance())
+        confidence_interval = 1.96 * std_beta
+
+        if degree == 5:
+            Analysis.plot_confidence_intervals(MODEL.beta, confidence_interval, N, noise, degree, 'conf_intervals_beta')
     
     
     Analysis.plot_mse_vs_complexity(MSE_train_scores, 
@@ -48,6 +50,13 @@ def partA(N, noise, poly_degree):
                                     noise, 
                                     poly_degree, 
                                     "mse_vs_complexity")
+    
+    Analysis.plot_r2_vs_complexity(R2_train_scores,
+                                   R2_test_scores,
+                                   N,
+                                   noise,
+                                   poly_degree,
+                                   "r2_vs_complexity")
 
 N = int(sys.argv[1])
 noise = float(sys.argv[2])

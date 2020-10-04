@@ -7,7 +7,7 @@ class Lasso(object):
 
     def __init__(self, X, z, lmbda):
         
-        self.lasso = linear_model.Lasso(alpha=lmbda, fit_intercept=False, max_iter=20000, tol=1e-5)
+        self.lasso = linear_model.Lasso(alpha=lmbda, fit_intercept=False, max_iter=10000)
         self.X = X
         self.z = z
         self.lmbda = lmbda
@@ -32,20 +32,6 @@ class Lasso(object):
         else:
             self.z_predict = self.lasso.predict(self.X_test)
             return self.z_predict
-
-    def SVD(self, X):
-        
-        # decomposition
-        U, s, VT = np.linalg.svd(X)
-        invD = np.zeros((len(U),len(VT)))
-
-        for i in range(0,len(VT)):
-            invD[i,i]=1/s[i]
-
-        UT = np.transpose(U)
-        V = np.transpose(VT)
-
-        return np.matmul(V,np.matmul(invD,UT))
 
     def scaleData(self):
         """
