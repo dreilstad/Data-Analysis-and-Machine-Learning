@@ -1,38 +1,52 @@
 import numpy as np
 
 from analysis import Analysis
-from tools import computeDesignMatrix
-from regression import Regression
+from ols import OrdinaryLeastSquares
 from ridge import Ridge
 from lasso import Lasso
+
+def computeDesignMatrix(x, y, degree):
+	N = len(x)
+	P = int(degree*(degree+3)/2)
+
+	X = np.zeros(shape=(N, P+1))
+	X[:,0] = 1.0
+
+	index = 1
+	for i in range(1, degree + 1):
+		for j in range(i + 1):
+			X[:,index] = (x**(i - j)) * (y**j)
+			index += 1
+	
+	return X
 
 class Bootstrap(object):
 
 
     @staticmethod
     def bootstrap(x, y, z, degree, bootstraps, method, lmbda=0.0):
-        """Performs the bootstrap resampling method on given dataset.
+        '''Performs the bootstrap resampling method on given dataset.
         
         Args:
-            x, y, z: dataset to be resampled
-            degree: degree of polynomial
-            bootstraps: number of iterations
-            method: OLS v Ridge v Lasso
-            lmbda: default value 0.0, if method=Ridge then lmbda will be given
+            x, y, z (ndarray): dataset to be resampled
+            degree (int): degree of polynomial
+            bootstraps (int): number of iterations
+            method (string): OLS v Ridge v Lasso
+            lmbda (float): lambda value
         Returns:
-            mse: Mean Squared Error for the test set
-            mse_train: Mean Squared Error for the training set
-            bias
-            variance
-            beta_average
-            beta_variance
-        """
+            mse (ndarray): mse for the test set
+            mse_train (ndarray): mse for the training set
+            bias (ndarray): bias for the test set
+            variance (ndarray): variance for the test set
+            beta_average (ndarray): average beta coefficients
+            beta_variance (ndarray): variance of beta coefficients
+        '''
 
         DesignMatrix = computeDesignMatrix(x, y, degree)
 
         # create model of type
         if method == 'OLS':
-            MODEL = Regression(DesignMatrix, z)
+            MODEL = OrdinaryLeastSquares(DesignMatrix, z)
         elif method == 'Ridge':
             MODEL = Ridge(DesignMatrix, z, lmbda)
         elif method == 'Lasso':
@@ -94,16 +108,16 @@ class CrossValidation(object):
 
     @staticmethod
     def kFoldSplit(folds, N_data):
-        """Shuffles indices of given length and divides indices into test-indices and train-indices.
+        '''Shuffles indices of given length and divides indices into test-indices and train-indices.
         Returns test-indices and train-indices for each fold.
 
         Args:
-            folds: number of folds
-            N_data: number of indices to be split/divided
+            folds (int): number of folds
+            N_data (int): number of indices to be split/divided
         Return:
-            train_indices: 2D list where each index in list is a list of indices
-            test_indices: 2D list where each i in list is a list of indices
-        """
+            train_indices (ndarray): 2D list where each index in list is a list of indices
+            test_indices (ndarray): 2D list where each i in list is a list of indices
+        '''
 
         if N_data % folds != 0:
             print("Not able to divide dataset in k = " + str(folds) + " folds evenly!")
@@ -137,22 +151,34 @@ class CrossValidation(object):
 
     @staticmethod
     def kFoldCrossValidation(x, y, z, degree, folds, method, lmbda=0.0):
-        """Performs the k-fold cross validation rsampling method.
+        """Performs the k-fold cross validation resampling method.
+
+        The dataset is divided into folds and each fold is the test fold once.
+        Example for k = 4:
+        k=1: |test|train|train|train|
+
+        k=2: |train|test|train|train|
+
+        k=3: |train|train|test|train|
+
+        k=4: |train|train|train|test|
 
         Args:
-            x, y, z: dataset to be resampled
-            degree: degree of polynomial
-            bootstraps: number of iterations
-            method: OLS v Ridge v Lasso
-            lmbda: default value 0.0, if method=Ridge then lmbda will be given
+            x, y, z (ndarray): dataset to be resampled
+            degree (int): degree of polynomial
+            folds (int): number of folds
+            method (string): OLS v Ridge v Lasso
+            lmbda (float): lambda value
         Returns:
-            average_mse_test: average Mean Squared Error for the test set
+            average_mse_test (ndarray): average msefor the test set
+            average_mse_train (ndarray): average mse for the train set
+            average_r2_test (ndarray): average r2 for the test set
         """
 
         DesignMatrix = computeDesignMatrix(x, y, degree)
         
         if method == 'OLS':
-            MODEL = Regression(DesignMatrix, z)
+            MODEL = OrdinaryLeastSquares(DesignMatrix, z)
         elif method == 'Ridge':
             MODEL = Ridge(DesignMatrix, z, lmbda)
         elif method == 'Lasso':
