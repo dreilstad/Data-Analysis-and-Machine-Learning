@@ -19,9 +19,6 @@
 \DeclarePairedDelimiter\set\{\}
 \newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
 
-% figures in multicols environment ------------------------------------------- %
-
-
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\E}{\mathbb{E}}
 \newcommand{\y}{\mathbf{y}}
@@ -42,7 +39,7 @@
         
         \vspace{0.5cm}
         \begin{abstract}
-            \noindent The regression methods Ordinary Least Squares, Ridge regression and Lasso regression was compared and analyzed on the Franke function with varying amounts of noise and size of datasets. While using bootstrap and k-fold cross validation as resampling techniques and MSE and the $R^{2}$-score as model assessment measurements, we found that Ordinary Least Squares performed best for larger datasets with no noise. For smaller datasets with noise, Ridge performed better and more stable for higher complexities with Lasso performing slightly worse than Ridge. After testing on the Franke function, the regression methods were applied to terrain data of an area outside Stavanger, Norway. Ordinary Least Squares estimated the terrain data best, with Ridge regression also performing well.
+            \noindent The regression methods Ordinary Least Squares, Ridge regression and Lasso regression was compared and analyzed on the Franke function with varying amounts of noise and size of datasets. While using bootstrap and k-fold cross validation as resampling techniques and MSE and the $R^{2}$-score as model assessment measurements, Ordinary Least Squares was found to perform best for larger datasets with no noise. For smaller datasets with noise, Ridge performed better and more stable for higher complexities with Lasso performing slightly worse than Ridge. After testing on the Franke function, the regression methods were applied to terrain data of an area outside Stavanger, Norway. Ordinary Least Squares estimated the terrain data more accurately, with Ridge regression also performing well.
         \end{abstract}
         \vspace{0.8cm}
         \includegraphics[scale=0.59]{terrain.png}
@@ -62,9 +59,9 @@
 \section{Introduction}
 Regression analysis is the process of using statistical methods to examine the relationship between a number of independent variables and a dependent variable. The goal of regression analysis is to exploit the resulting model from our regression analysis to make predictions and fit a function to the independent variables. The ability to infer information from the relationship between a set of independent variables and a dependent variable to predict and forecast is an incredibly powerful tool.\\
 \\
-Regression analysis and modeling is widely used in disciplines such as social sciences, epidemiology, finance and economics, and also plays an important role in machine learning. Especially relevant at the time of writing, is regression analysis in the field of epidemiology. Considering the current COVID-19 pandemic, using regression analysis to track the spread of a virus in a population and being able to predict the development of spread is an incredibly powerful tool. In general regression analysis is an important tool used in analytical epidemiology.\cite{epidemiology}\\
+Regression analysis and modeling is widely used in disciplines such as social sciences, epidemiology, finance and economics, and also plays an important role in machine learning.\ Especially relevant at the time of writing, is regression analysis in the field of epidemiology. Considering the current COVID-19 pandemic, using regression analysis to track the spread of a virus in a population and being able to predict the development of spread is an incredibly powerful tool. In general, regression analysis is an important tool used in analytical epidemiology.\cite{epidemiology}\\
 \\
-The focus of this project was to study various regression methods such as Ordinary Least Squares(OLS), Ridge regression and Lasso regression. Furthermore using resampling methods like k-fold cross validation and boostrap in order to evaluate the resulting model from the various regression methods. Code written for OLS and Ridge regression, and also for both of the aforementioned resampling methods is located in the linked Github repository. For Lasso regression, functionality from Scikit-Learn was used. \\
+The focus of this project was to study various regression methods such as Ordinary Least Squares(OLS), Ridge regression and Lasso regression. Furthermore using resampling methods like k-fold cross validation and boostrap in order to evaluate the resulting model from the various regression methods.\ Code written for OLS and Ridge regression, and also for both of the aforementioned resampling methods is located in the linked Github repository. For Lasso regression, functionality from Scikit-Learn was used. \\
 \\
 The subsequent sections of the project starts with an outline of the theory and method used to produce the results in the present work. Also information about the datasets used in the project is provided. Thereafter the results are presented and discussed. The report is ended with a conclusion.
 \section{Method}
@@ -142,8 +139,8 @@ where $\mathbf{I}$ is the identity matrix. With the constraints
 \end{align*}
 where $t$ is a finite positive number. Also notice that for $\lambda = 0$, the estimator becomes an OLS estimator. \\
 \\
-OLS simply finds the unbiased coefficents of $\B$, meaning every feature (column) of the design matrix $\X$ is evaluated equally. The method does not consider if a number of the features are more important than the others. For ridge regression on the other hand you are able to tune the regularization parameter $\lambda$, which will lead to different coefficients. Ridge regression shrinks the coordinates $\y$ by changing the model coefficients\cite{ridge1, ridge2}. To better understand why this is the case, we must first introduce Singular Value Decomposition (SVD).
-\subsubsection{Singular Value Decomposition}
+OLS simply finds the unbiased coefficents of $\B$, meaning every feature (column) of the design matrix $\X$ is evaluated equally.\ The method does not consider if certain features are more important than the others. For ridge regression on the other hand you are able to tune the regularization parameter $\lambda$, which will lead to different coefficients. Ridge regression shrinks the values of $\y$ by shrinking the model coefficients. To better understand why this is the case, we must first introduce Singular Value Decomposition\cite{ridge1, ridge2}.
+\subsubsection{Singular Value Decomposition (SVD)}
 In the situation where the product $\X^{T}\X$ is non-invertible, meaning that the columns of $\X$ are linearly dependent and therefore we have no solution to equation (6), we have the option of computing the pseudo-inverse matrix using the Singular Value Decomposition algorithm.\\
 \\
 From the textbook \textit{Linear Algebra and its Applications} by David C. Lays, et al. \cite{linalg}:
@@ -172,13 +169,13 @@ Now doing the same for ridge regression, we get
 \begin{align*}
         \ytilde^{Ridge} &= \X\Bhat = \X\left(\X^{T}\X + \lambda \mathbf{I}\right)^{-1}\X^{T}\y\\
     \ytilde^{Ridge} &= \mathbf{U\Sigma V}^{T}(\mathbf{V}\mathbf{\Sigma}^{2}\mathbf{V}^{T} + \lambda\mathbf{I})^{-1}(\mathbf{U\Sigma V}^{T})^{T}\y\\
-    \ytilde^{Ridge} &= \mathbf{UU}^{T}\y = \sum_{j=1}^{p}\mathbf{u}_{j}\frac{\mathbf{\sigma}_{j}^{2}}{\mathbf{\sigma}_{j}^{2} + \lambda}\mathbf{u}_{j}^{T}\y \numberthis\label{eqn}
+    \ytilde^{Ridge} &= \sum_{j=1}^{p}\mathbf{u}_{j}\frac{\mathbf{\sigma}_{j}^{2}}{\mathbf{\sigma}_{j}^{2} + \lambda}\mathbf{u}_{j}^{T}\y \numberthis\label{eqn}
 \end{align*}
 Since $\lambda \geq 0$, we must have
 \begin{align*}
     \frac{\mathbf{\sigma}_{j}^{2}}{\mathbf{\sigma}_{j}^{2} + \lambda} \leq 1 \numberthis\label{eqn}
 \end{align*}
-As mentioned previously, ridge regression shrinks the coordinates of $\y$. Comparing equation (11) and (12), we can se that ridge regression shrinks $\y$ with respect to the orthonormal basis $\mathbf{U}$ by a factor of $\frac{\mathbf{\sigma}_{j}^{2}}{\mathbf{\sigma}_{j}^{2} + \lambda}$. Recalling from the section about SVD, that the square root of the eigenvalues are ordered diagonally in a descending order such that $\sigma_{i} \geq \sigma_{i+1}$. $\sigma_{i}$ with smaller values being less important because they contribute less to $\y$ and are therefore applied more shrinkage than $\sigma_{i}$ with larger values. Essentially this means that ridge regression shrinks certain $\beta_{j}$ for features that are less important to fit the model.
+As mentioned previously, ridge regression shrinks the values of $\y$. Comparing equation (11) and (12), we can se that ridge regression shrinks $\y$ with respect to the orthonormal basis $\mathbf{U}$ by a factor of $\frac{\mathbf{\sigma}_{j}^{2}}{\mathbf{\sigma}_{j}^{2} + \lambda}$. Recalling from the section about SVD, that the square root of the eigenvalues are ordered diagonally in a descending order such that $\sigma_{i} \geq \sigma_{i+1}$. $\sigma_{i}$ with smaller values are less important because they contribute less to $\y$ and are therefore applied more shrinkage than $\sigma_{i}$ with larger values. Essentially this means that ridge regression shrinks certain $\beta_{j}$ for features that are less important to fit the model.
 \subsection{Lasso regression}
 Like ridge regression, with lasso regression we try to minimize the cost function including a regularization term. The difference between ridge regression and lasso regression is the regularization term. Where ridge regression uses the Euclidean $L^{2}$ norm for the regularization term, $\lambda\norm{\B}_{2}^{2}$. Lasso regression uses the $L^{1}$ norm, $\lambda\norm{\B}_{1}$. The cost function for lasso regression can written as
 \begin{align*}
@@ -199,13 +196,13 @@ where $s$ is a finite positive number. Computing the derivative of the cost func
 \end{align*}
 Unlike with OLS and ridge regression we do not have a analytical solution to equation (15). For lasso regression we need to use an iterative solver to find the $\B$ coefficients. \\
 \\
-The difference between ridge regression and lasso regression is that lasso regression can shrink coefficents to absolute zero, whereas ridge regression only shrinks the coefficients but never to absolute zero. The advantage of setting certain coefficients to zero is to reduce the number of degrees of freedom, i.e. number of features\cite{ridge1, ridge2}. For large datasets and as we will see in later sections with resampling methods where we train our model multiple times, a large number of features can significantly slow down the training and makes it harder to find a good model.
+The difference between ridge regression and lasso regression is that lasso regression can shrink coefficents to absolute zero, whereas ridge regression only shrinks the coefficients but never to absolute zero. The advantage of setting certain coefficients to zero is to reduce the number of degrees of freedom, i.e. number of features\cite{ridge1, ridge2}. For large datasets and as we will see in later sections with resampling methods where we train our model multiple times, a large number of features can significantly slow down the training a model.
 \subsection{Design Matrix}
 The datasets used in this project is our own generated dataset for the two-dimensional Franke function and also real two-dimensional terrain data. These datasets will be presented later. \\
 \\
-We will try to fit polynomials to the datasets. Therefore we have to structure columns of the design matrix $\X$ of the form $[x, y, x^{2}, y^{2}, xy, ...]$. In addition we set the first column to be a column of $1's$. This column is called the intercept. We increase the complexity of our model by increasing the degree of polynomials in the design matrix $\X$.\\
+We will try to fit polynomials to the datasets. Therefore we have to structure the columns of the design matrix $\X$ with the series $[x, y, x^{2}, y^{2}, xy, ...]$. In addition we set the first column to be a column of $1's$. This column is called the intercept. We increase the complexity of our model by increasing the degree of polynomials in the design matrix $\X$.\\
 \\
-For example for degree 3, the columns we use will be $[x, y, x^{2}, y^{2}, xy, x^{3}, y^{3}, x^{2}y, xy^{2}]$. The amount of columns needed in the design matrix for a given degree $a$, is given by
+For example for degree 3, the columns we use will be $[1, x, y, x^{2}, y^{2}, xy, x^{3}, y^{3}, x^{2}y, xy^{2}]$. The amount of columns needed in the design matrix for a given degree $a$, is given by
 \begin{align*}
     p &= a\frac{(a+3)}{2} + 1
 \end{align*}
@@ -222,11 +219,11 @@ where the mean value, $\overline{y}$, of $\widetilde{y}$ is defined as
 \begin{align}
     \overline{y} = \frac{1}{n}\sum_{i=0}^{n-1}y_{i}
 \end{align}
-MSE measures the quality of a predictor or estimator. The value is strictly positive and the closer to zero the value is the better. $R^{2}$-score is defined as the proportion of response variation that can be correlated to the independent variables/features. A score of close to 1 signifies a strong correlation, while a score of close to 0 indicates no correlation. Important to note and the reason why the word \textit{correlation} is used, is that correlation does not mean causation. While the $R^{2}$-score can reveal information about the relationship between variables, it does not on its own provide enough evidence of causation.\\
+MSE measures the quality of a predictor or estimator. The value is strictly positive and a value closer to 0 means a better model.\ $R^{2}$-score is defined as the proportion of response variation that can be correlated to the independent variables/features. A score of close to 1 signifies a strong correlation, while a score of close to 0 indicates no correlation.\ Important to note and the reason why the word \textit{correlation} is used, is that correlation does not mean causation. While the $R^{2}$-score can reveal information about the relationship between variables, it does not on its own provide enough evidence of causation.\\
 \\
-Another important aspect to assessing our models is to split the dataset. Using a function from the library Scikit-Learn, we split the dataset in a training set and a test set. In this project a $4/5$ split of the dataset was used, $4/5$ being the training set and $1/5$ the test set. By splitting the dataset we can train on the training set and afterwards test the model on the untouched test set. As we will see later in the report, low MSE training scores does not guarantee low MSE test scores. This especially occurs when we increase the complexity of our model and is a modeling error called overfitting. This means our model is too closely fitted to the training set and will therefore perform worse when tested on the test set.\\
+Another important aspect to assessing our models is to split the dataset. Using a function from the library Scikit-Learn, we split the dataset in a training set and a test set. In this project a $4/5$ split of the dataset was used, $4/5$ being the training set and $1/5$ the test set. By splitting the dataset we can train on the training set and afterwards test the model on the untouched test set. As we will see later in the report, low MSE training scores does not guarantee low MSE test scores. This is especially apparent when we increase the complexity of our model and is a modeling error called overfitting. This means our model is too closely fitted to the training set and will therefore perform worse when tested on the test set.\\
 \\
-To calculate the confidence intervals, we use the variance of the $\B$ coefficients\cite{ridge2} 
+To calculate the confidence intervals of the $\B$ coefficients, we use the variance \cite{ridge2} 
 \begin{align*}
     Var(\B) = (\X^{T}\X)^{-1}\sigma^{2}
 \end{align*}
@@ -253,10 +250,9 @@ See appendix \autoref{app:A} for the derivation of the decomposition. The first 
 \\
 The second term is the variance. The variance is the error caused by sensitivity to noise in the training set. Theoretically we should expect the variance to increase asymptotically as we increase the complexity of our model. The reason for this is because the model, when having a high degree of freedom, tries to model the noise rather than the actual true response in the limited amount of data we usually have. Thus the variance increases, which is the exact opposite of what me want. The last term is the irreducible error, which is simply the noise in the training set itself. \\
 \\
-The motivation behind presenting the bias-variance tradeoff is because we want to choose the model that accurately models the training set, but is general enough such that it performs well for untouched and unseen test data. As we will see in the subsequent sections this is typically impossible to achieve, hence the tradeoff. \\
-The bias-variance tradeoff is a fundamental problem in machine learning where we have to balance the complexity of a model and the amount of traning data we have to train it. Too high complexity leads to overfitting because of high variance caused by a dependency on the limited amount of training data and modeling of the noise. While too low complexity leads to underfitting because of high bias caused by not being able to model the actual function. Both overfitting and underfitting leads to large MSE values. The tradeoff is therefore selecting a model somewhere in between underfitting and overfitting.
+The motivation behind presenting the bias-variance tradeoff is because we want to choose the model that accurately models the training set, but is general enough such that it performs well for untouched and unseen test data. As we will see in the subsequent sections this is typically impossible to achieve, hence the tradeoff. The bias-variance tradeoff is a fundamental problem in machine learning where we have to balance the complexity of a model and the amount of traning data we have to train it. Too high complexity leads to overfitting because of high variance caused by a dependency on the limited amount of training data and modeling of the noise. While too low complexity leads to underfitting because of high bias caused by not being able to model the actual function. Both overfitting and underfitting leads to large MSE values. The tradeoff is therefore selecting a model somewhere in between underfitting and overfitting.
 \subsection{Resampling techniques}
-Resampling techniques a powerful tool in statistics when data is limited and we do not know anything about the uncertainty of our model. These techinques helps us assess the statistical accuracy(model assessment), and choose the appropriate level of flexibility of a model(model selection). Although, using resampling techniques can be quite computationally expensive when dealing with large dataset but is not in general a hindrance. In this project we looked at the bootstrap method and k-fold cross validation.
+Resampling techniques are powerful tools in statistics when data is limited and we do not know anything about the uncertainty of our model. These techinques helps us assess the statistical accuracy(model assessment), and choose the appropriate level of complexity of a model(model selection). Although, using resampling techniques can be quite computationally expensive when dealing with large dataset but is not in general a hindrance. In this project we looked at the bootstrap method and k-fold cross validation.
 \subsubsection{Bootstrap method}
 The bootstrap method is a resampling technique where $n$ samples are randomly drawn from the training set of the same size. Duplicates are allowed. After drawing samples the model is fitted to the resampled dataset and predicted on an untouched test set. The model is saved for later. This is repeated $k$ times. This resampling technique is often used during model selection, which is when we are selecting the appropriate level of flexibility for a model.\\
 \\
@@ -268,7 +264,7 @@ K-fold cross validation is used as a resampling technique in the process of mode
 \section{Datasets}
 The first dataset is generated using the function $\verb"np.random.uniform"$ from the NumPy library. Generating our own dataset allows us to study the effect of increasing the size of the dataset and complexity of the model with the different regression methods with resampling techniques, and also look at the bias-variance-tradeoff. The generated dataset is tested with the Franke function $f(x,y)$, which is defined for $x,y \in [0,1]$.\\
 \\
-The other dataset is real terrain data downloaded from United States Geological Survey's earthexplorer website: \href{https://earthexplorer.usgs.gov}{\color{blue}https://earthexplorer.usgs.gov}. The data used in the project is a topological terrain map of an area around Stavanger located on the southwest coast of Norway. The raw data is available in the file \verb"SRTM_dat_Norway_1.tif". Considering that the terrainmap is of size $3601\times 1801$, it is computationally infeasible to use the entire area. We therefore only study a subset of the terrain. In addition, before training and fitting a model we normalize the terrain data. The terrain data, $z_{t}$, is normalized by
+The other dataset is real terrain data downloaded from United States Geological Survey's earthexplorer website: \href{https://earthexplorer.usgs.gov}{\color{blue}https://earthexplorer.usgs.gov}. The data used in the project is a topological terrain map of an area around Stavanger located on the southwest coast of Norway. The raw data is available in the file \verb"SRTM_data_Norway_2.tif". Considering that the terrainmap is of size $3601\times 1801$, it is computationally infeasible to use the entire area. We therefore only study a subset of the terrain. In addition, before training and fitting a model we normalize the terrain data. The terrain data, $z_{t}$, is normalized by
 \begin{align*}
     z_{t} &:= z_{t} - min(z_{t})\\
     z_{t} &:= \frac{z_{t}}{max(z_{t})}
@@ -303,7 +299,7 @@ Starting with testing an Ordinary Least Squares (OLS) fit to the Franke function
     \end{subfigure}
     \caption{2(a) and 2(b) illustrates the MSE score for each level of complexity. (a) has no added noise to the dataset, while (b) has added noise of 0.04. Score for the test set is plotted in blue and score for training set is plotted in red.}
 \end{figure}\\
-\noindent Comparing Figure 2(a) and 2(b), we see the effect of noise in our dataset. When noise is added the MSE test starts to rise and gets significantly worse. While the MSE for the training set continuously sinks. Still we see that regardless of if there is noise, that MSE test and train diverges for higher levels of complexity. The reason for this is overfitting. For $N=400$, our model does not generalize enough and therefore fails when new and unseen data is tested on the model.\\
+\noindent Comparing Figure 2(a) and 2(b), we see the effect of noise in our dataset. When noise is added the MSE test starts to rise and gets significantly worse. While the MSE for the training set continuously decreases. Still we see that regardless of if there is noise, MSE test and train diverges for higher levels of complexity. The reason for this is overfitting. For $N=400$, our model does not generalize enough and therefore fails when new and unseen data is tested on the model.\\
 \\
 Plotting the $R^{2}$-score for the training set and test set results in Figure 3(a) and 3(b).
 \begin{figure}[ht]
@@ -335,7 +331,7 @@ Plotting the $R^{2}$-score for the training set and test set results in Figure 3
 \end{figure}\\
 In addition to studying the effect of noise, we can study the effect of having a larger dataset. Comparing Figures 4(a) and 4(b) with 2(b) and 3(b), which are plots with the same amount of noise added but the latter has far fewer datapoints. The $R^{2}$ score from 4(b) shows a near perfect fit and the MSE from 4(a) does not contain the large divergence between the MSE train and MSE test that 2(b) does.\\
 \\
-A larger dataset seems to equalize the effect of noise, and make the model more robust. A robust model will have more accurate $\B$ coefficients. A way to visualize this is to look at the confidence intervals of the variance of the $\B$ coefficients.
+A larger dataset seems to equalize the effect of noise, and make the model more robust. A robust model will have more accurate $\B$ coefficients. A way to visualize this is to look at the confidence intervals of the $\B$ coefficients.
 \begin{figure}[ht]
     \centering
     \begin{subfigure}[b]{0.9\columnwidth}
@@ -382,9 +378,9 @@ Continuing with OLS and the bootstrap method to fit the model, we study the bias
     \end{subfigure}
     \caption{7(a) and 7(b) plots the bias-variance decomposition for the MSE test score with OLS. For both figures, the bootstrap method was used as the resampling technique, with bootstraps $= 50$. The MSE is plotted in blue, bias in orange and the variance in green. }
 \end{figure}\\
-Using the OLS estimator, the test error has a minimum for polynomial degree 11. Polynomial degree 11 is the optimal level of complexity for the model fitted to the specific dataset. This where there is a balance between the variance and bias, and neither overpowers the other. \\
+Using the OLS estimator, the test error has a minimum for polynomial degree 11. Polynomial degree 11 is the optimal level of complexity for the model fitted to the specific dataset. This is where there is a balance between the variance and bias, and neither dominates the other. \\
 \\
-On the other hand, from Figure 7(b) we see that with noise the optimal level of complexity is approximately polynomial degree 7 but we could choose a complexity between 7-11 seeing as the error is almost constant in the interval. The error is higher compared to (a) beacause of the added noise, but the model has a lower level of complexity. It is preferable to have a lower complexity because we need fewer $\B$ coefficients to sufficiently fit the model to the dataset.\\
+On the other hand, from Figure 7(b) we see that with noise the optimal level of complexity is approximately polynomial degree 7 but we could choose a complexity between 7-11 seeing as the error is almost constant in the interval. The error is higher compared to (a) because of the added noise, but the model has a lower level of complexity. It is preferable to have a lower complexity because we need fewer $\B$ coefficients to sufficiently fit the model to the dataset.\\
 Unlike the bias in Figure 7(a), the bias in Figure 7(b) does not continue decreasing towards 0 like expected. Instead the bias flattens out and remains almost constant from polynomial degree 7 and up until it increases. The reason for this may be numerical instability, but the instability could also be caused by the high degree of polynomial. It may be the case that the model can sufficiently fit to the Franke function with a lower degree of polynomial, but as the complexity is increased it "blows up" the values to a point where the model can no longer be fitted accurately and therefore introducing bias.\\
 \\
 Now we introduce Ridge regression and Lasso regression to study the effect of a regularization parameter on the bias-variance. Figure 8 show the plot of the bias-variance decomposition with Ridge regression for $\lambda = 1\textrm{e}-10$.
@@ -444,7 +440,7 @@ Next we compare all introduced regression methods using k-fold cross validation 
     \end{subfigure}
     \caption{11(a) and 11(b) compares the MSE score for the training set and test set for each regression method. The MSE train score is plotted as a dotted line, while MSE test score is plotted as a solid line. OLS is plotted in red, Ridge in blue and Lasso in orange. K-fold cross validation was used as the resampling technique.}
 \end{figure}\\
-Important to note about the results in Figure 11 is the random apsect of the k-fold cross validation algorithm.\ While holding all parameters and dataset constant, the random shuffle of the dataset in the algorithm will result in different MSE scores when the code is run again. Especially for OLS. Still, when run enough times we start to see similar trends.\\
+Important to note about the results in Figure 11 is the random aspect of the k-fold cross validation algorithm.\ While holding all parameters and dataset constant, the random shuffle of the dataset in the algorithm will result in different MSE scores when the code is run again. Especially for OLS. Still, when run enough times we start to see similar trends.\\
 \\
 Comparing the regression methods in 11(a) we see that the OLS estimator results in the best fit for polynomial degrees 4 up to around 12. At this point the test error starts to diverge from the train error and asymptotically increase, not unlike we have seen earlier in the results and discussion. Ridge and Lasso converges and the error remains relatively constant as the complexity increases from polynomial degree 6, where Ridge results in a lower error compared to Lasso when no noise is added. Although for higher complexity the Ridge test error varies slightly from the train error compared to Lasso where the test and train error are essentially identical. The slight variation for Ridge may be caused by the numerical instability. \\
 \\
@@ -536,25 +532,25 @@ As we can see from Figure 14, OLS results in the best MSE score with Ridge regre
         \hline
     \end{tabular}
 \end{table}\\
-Using OLS with a high level of complexity results in the best fit and error scores on the terrain data. The reason why we do not see a large divergence between the MSE test and train scores is because the terrain data does not contain any decisive noise. If the data did contain a lot of noise, it is not unlikely we would see Ridge regression and Lasso regression performing better than OLS for higher polynomial degrees due to the variance "blowing up".\\
+Using OLS with a high level of complexity results in the best fit and error scores on the terrain data. The reason why we do not see a large divergence between the MSE test and train scores is because the terrain data does not contain any decisive noise and the dataset is quite large. If the data did contain a lot of noise, it is not unlikely we would see Ridge regression and Lasso regression performing better than OLS for higher polynomial degrees due to the variance "blowing up".\\
 \\
-We see from Figure 15(a) with OLS that the bias-variance decomposition for the terrain data is dominated by the bias for all polynomial degrees. Therefore the usefulness and necessity of a regularization parameter $\lambda$ like with Ridge and Lasso regression is reduced. While error with OLS is more unstable for higher complexity in 15(a), the error is still lower than with Ridge and Lasso in 15(b) and 15(c) respectively. \\
+We see from Figure 15(a) with OLS that the bias-variance decomposition for the terrain data is dominated by the bias for all polynomial degrees. Therefore the usefulness and necessity of a regularization parameter $\lambda$ like with Ridge and Lasso regression is reduced. While the error with OLS is more unstable for higher complexity in 15(a), the error is still lower than with Ridge and Lasso in 15(b) and 15(c) respectively. \\
 \\
 Again we see also see the difference in result between Ridge and Lasso regression in 15(b) and 15(c). The error for Ridge converges at a lower value than Lasso, but the variance remains relatively constant at a similar value.\\
 \\
 \begin{figure}[ht]
-    \begin{subfigure}{0.475\columnwidth}
+    \centering
+    \begin{subfigure}{0.55\columnwidth}
         \centering
         \includegraphics[width=\columnwidth]{bias_variance_tradeoff_OLS_Bootstraps=50_N=10000_Noise=0.0_Degree=1-30.png}
         \caption{Bias-variance decomposition with OLS for $N=10000$ and polynomial degrees $1-30$.}
-    \end{subfigure}\hspace{0.1cm}
-    \begin{subfigure}{0.475\columnwidth}
+    \end{subfigure}\\[1ex]
+    \begin{subfigure}{0.55\columnwidth}
         \centering
         \includegraphics[width=\columnwidth]{bias_variance_tradeoff_Ridge_Lambda=1e-11_Bootstraps=50_N=10000_Noise=0.0_Degree=1-30.png}
         \caption{Bias-variance decompositon with Ridge for $N=10000$, polynomial degrees $1-30$ and $\lambda = 1\textrm{e}-11$.}
     \end{subfigure}\\[1ex]
-    \centering
-    \begin{subfigure}{0.5\columnwidth}
+    \begin{subfigure}{0.55\columnwidth}
         \centering
         \includegraphics[width=\columnwidth]{bias_variance_tradeoff_Lasso_Lambda=1e-11_Bootstraps=50_N=10000_Noise=0.0_Degree=1-20.png}
         \caption{Bias-variance decompositon with Lasso for $N=10000$, polynomial degrees $1-20$, and $\lambda = 1\textrm{e}-11$.}
@@ -592,7 +588,7 @@ Ridge and Lasso was found to be more favored for smaller datasets and datasets w
 \\
 When comparing the resampling methods used in the project, k-fold cross validation provided more stable and better results than the bootstrap method. The bootstrap method was found to be more sensitive to noise and also performs worse for higher complexity. However k-fold cross validation may provide a too "optimistic" result which may lead to selecting a overfitted model during model selection if you are not careful.\\
 \\
-Applying the regression methods on the terrain data, using k-fold cross validation, resulted in much of the same results as when tested on the Franke function. OLS performed best on the terrain data due to the large dataset and no noise in the dataset. Ridge performed slighlty worse than OLS, but the error estimate was more stable with Ridge for higher complexity. Lasso did not perform as well as OLS and Ridge and converged on a higher error. Due to the nature of the terrain data, the regularization parameter $\lambda$ for Ridge and Lasso regression proved to be insignificant and inconsequential. 
+Applying the regression methods on the terrain data, using k-fold cross validation, resulted in much of the same results as when tested on the Franke function. OLS performed best on the terrain data due to the large dataset and no noise in the dataset. Ridge performed slighlty worse than OLS, but the error estimate was more stable with Ridge for higher complexity. Lasso did not perform as well as OLS and Ridge and converged on a higher error. Due to the nature of the terrain data, the regularization parameter $\lambda$ for Ridge and Lasso regression proved to not be important enough to outperform OLS.
 \begin{thebibliography}{9}
 \bibitem{epidemiology}
 Bender, R. (2009). Introduction to the use of regression models in epidemiology. Methods in molecular biology (Clifton, N.J.), 471, 179–195. \url{https://pubmed.ncbi.nlm.nih.gov/19109780/}
