@@ -2,7 +2,9 @@
 
 Repository contains the code and report written for the projects in the course FYS-STK3155/4155 at University of Oslo.
 
-[Project 1 PDF](Project1/Report/FYS_STK3155_Project1.pdf)
+[Project 1 - Regression analysis and resampling methods](Project1/Report/FYS_STK3155_Project1.pdf)
+
+[Project 2 - Classification and Regression, from linear and logistic regression to neural networks](Project2/Report/)
 
 ## Course content
 The course introduces a variety of central algorithms and methods essential for studies of data analysis and machine learning. The course is project based and through the various projects, the students will be exposed to fundamental research problems in these fields, with the aim to reproduce state of the art scientific results. The students will learn to develop and structure large codes for studying these systems, get acquainted with computing facilities and learn to handle large scientific projects. A good scientific and ethical conduct is emphasized throughout the course.
