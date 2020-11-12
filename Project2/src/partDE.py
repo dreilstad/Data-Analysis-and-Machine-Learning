@@ -305,7 +305,7 @@ if __name__ == "__main__":
     
     possible_args.add_argument('-h', '--help',
                                action='help',
-                               help='Helpful message showing flags and usage of code for part A')
+                               help='Helpful message showing flags and usage of code for part D & E')
 
     args = parser.parse_args()
 

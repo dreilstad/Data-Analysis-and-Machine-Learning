@@ -115,7 +115,7 @@ if __name__ == "__main__":
                                type=int, 
                                required=False,
                                default=50,
-                               help='Specify learning rate')
+                               help='Specify number of neurons')
 
     possible_args.add_argument('-mb', '--size_minibatch', 
                                type=int, 
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     
     possible_args.add_argument('-h', '--help',
                                action='help',
-                               help='Helpful message showing flags and usage of code for part A')
+                               help='Helpful message showing flags and usage of code for part B & C')
 
     args = parser.parse_args()
 
