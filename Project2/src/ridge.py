@@ -14,7 +14,7 @@ class Ridge(object):
         return self.beta
 
 
-    def fit(self, *args):
+    def fit(self, X_train=None, z_train=None):
         '''Function calculates the beta coefficients using 'inv(X.T @ X) @ X.T @ z',
            the inversion is done with SVD. Default is using the training set, 
            but arguments can be provided manually.
@@ -25,15 +25,13 @@ class Ridge(object):
             a vector with the beta coefficients
         '''
 
-        if len(args) == 0:
+        if X_train is None:
             A = (self.X_train.T @ self.X_train) + np.eye(self.X_train.shape[1]) * self.lmbda
             self.beta = self.SVD(A) @ self.X_train.T @ self.z_train
             return self.beta
         else:
-            X = args[0]
-            z = args[1]
-            A = (X.T @ X) + np.eye(X.shape[1]) * self.lmbda
-            self.beta = self.SVD(A) @ X.T @ z
+            A = (X_train.T @ X_train) + np.eye(X_train.shape[1]) * self.lmbda
+            self.beta = self.SVD(A) @ X_train.T @ z_train
             return self.beta
     
     def predict(self, test=False):

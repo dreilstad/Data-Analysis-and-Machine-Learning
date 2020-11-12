@@ -12,7 +12,7 @@ class OrdinaryLeastSquares(object):
     def beta(self):
         return self.beta
 
-    def fit(self, *args):
+    def fit(self, X_train=None, z_train=None):
         '''Function calculates the beta coefficients using 'inv(X.T @ X) @ X.T @ z',
            the function pinv does the equivalent. Default is using the training set, 
            but arguments can be provided manually.
@@ -22,11 +22,11 @@ class OrdinaryLeastSquares(object):
         Returns:
             a vector with the beta coefficients
         '''
-        if len(args) == 0:
+        if X_train is None:
             self.beta = np.linalg.pinv(self.X_train) @ self.z_train
             return self.beta
         else:
-            self.beta = np.linalg.pinv(args[0]) @ args[1]
+            self.beta = np.linalg.pinv(X_train) @ z_train
             return self.beta
 
     def predict(self, test=False):
