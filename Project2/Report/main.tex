@@ -54,7 +54,7 @@
     
     \vspace{0.2cm}
     
-    \faGithub \ \small \href{https://github.com/dreilstad/FYS-STK3155/tree/master/Project1}{github.com/dreilstad/FYS-STK3155/Project1}
+    \faGithub \ \small \href{https://github.com/dreilstad/FYS-STK3155/tree/master/Project2}{github.com/dreilstad/FYS-STK3155/Project2}
 \end{center}
 \vspace{0.5cm}
 \section{Introduction}
@@ -200,7 +200,7 @@ The updating of the weights and biases is done using the SGD optimization algori
     w_{jk}^{l} &:= w_{jk}^{l} - \eta \delta_{j}^{l} a_{k}^{l - 1}\\
     b_{j}^{l} &:= b_{j}^{l} - \eta \delta_{j}^{l}
 \end{align}
-where $\delta_{j}^{l}a_{k}^{l - 1}$ in (15) is the derivative of the cost function w.r.t. to the weights $w_{jk}^{l}$ and likewise in (16) $\delta_{j}^{l}$ is the derivative w.r.t. the bias $b_{j}^{l}$. To improve the training of the neural network, a regularization parameter $\lambda$ is applied ot the weights. The regularization is done like this
+where $\delta_{j}^{l}a_{k}^{l - 1}$ in (15) is the derivative of the cost function w.r.t. to the weights $w_{jk}^{l}$ and likewise in (16) $\delta_{j}^{l}$ is the derivative w.r.t. the bias $b_{j}^{l}$. To improve the training of the neural network, a regularization parameter $\lambda$ is applied to the weights. The regularization is done like this
 \begin{align}
     w_{jk}^{l} &:= w_{jk}^{l} - \eta (\delta_{j}^{l} a_{k}^{l - 1} + \lambda w_{jk}^{l})
 \end{align}
@@ -213,7 +213,7 @@ When training the neural network, the feed forward pass and the backpropagation 
 \\
 Backpropagation is essentially an algorithm for propogating the error back through the network and calculating the error each neuron is responsible for, and subsequently use this to update the weights and bias accordingly. If done enough number of epochs, you start to converge at a local minimum and approach the optimal weights and biases.
 \subsubsection{Activation functions}
-The activation function $f$ in equation (12) is a generalized notation. In fact there are several activation functions to choose from and the layers can also have different activation function depending on the problem type. For the regression case in this project, we use the an activation function for the hidden layers but no activation function for the output layer. In the the case of classification, we instead use the softmax function from equation (8) for the output layer.\\
+The activation function $f$ in equation (12) is a generalized notation. In fact there are several activation functions to choose from and the layers can also have different activation function depending on the problem type. For the regression case in this project, we use an activation function for the hidden layers but no activation function for the output layer. In the the case of classification, we instead use the softmax function from equation (8) for the output layer.\\
 \\
 The activation functions for the hidden layers implemented and experimented with in this project is the Sigmoid function, tanh, RELU and Leaky RELU.
 \begin{center}
@@ -321,9 +321,9 @@ where $I$ is in indicator function. $1$ if $y = \widetilde{y}$, 0 if $y \neq \wi
 \end{align}
 The Mean Squared Error (MSE) measures the quality of a predictor or estimator. The value from MSE is strictly positive. The closer the value is to 0, the more accurate the predictor/estimate is. The accuracy score is a metric for evaluating a classification model. The value from equation (31) is the fraction of predictions that was correct. An accuracy score of 1 means the model correctly predicted all samples.
 \section{Datasets}
-The datasets used in this project is the MNIST dataset of handwritten digits as images and also a generated dataset used with the Franke function. The MNIST dataset is used for classififcation when experimenting with the implementation of neural networks and multinomial logistic regression. The generated dataset with the Frank function is used for regression when testing the SGD variants and neural network implementation.
+The datasets used in this project is the MNIST dataset of handwritten digits as images and also a generated dataset used with the Franke function. The MNIST dataset is used for classififcation when experimenting with the implementation of neural networks and multinomial logistic regression. The generated dataset with the Frank function is used for regression when testing the SGD variants, linear regression and neural networks.
 \subsubsection{Generated dataset with the Franke function}
-See section 3 in project 1 for a more detailed explanation about the genereated dataset, and alos information about the Franke function.\cite{project1} 
+See section 3 in project 1 for a more detailed explanation about the generated dataset, and also information about the Franke function.\cite{project1} 
 \subsubsection{MNIST}
 The MNIST database contains around 60,000 training images and 10,000 test images. In this project, a selection of approximately 1700 images from Scikit-Learn's dataset is used. The images are of size $8 \times 8$ with a handdrawn digit from $0-9$. Figure 2 shows an example image from the dataset.
 \begin{figure}[ht]
@@ -600,13 +600,15 @@ Neural networks with RELU and Leaky RELU are able to achieve a high accuracy sco
 \\
 Next we compare the results for neural networks in figure \ref{fig:14} to the results from logistic regression on the dataset in figure \ref{fig:15}. Figure \ref{fig:15} plots the accuracy score as a function of the learning rate $\eta$ and regularization parameter $\lambda$.\\
 \\
-From figure \ref{fig:15} we see both our own logistic regression code and Scikit's achieving a high accuracy test score. Own logistic regression performs slightly better than Scikit's for almost all $\eta$ and $\lambda$ values achieving a maximum accuracy score of 0.96 with $\eta = 0.1$. Scikit's SGDClassifier achives a maximum accuracy test score of 0.94.\\
+From figure \ref{fig:15} we see both our own logistic regression code and Scikit's achieving a high accuracy test score. Own logistic regression performs slightly better than Scikit's for almost all $\eta$ and $\lambda$ values achieving a maximum accuracy score of 0.96 with $\eta = 0.1$. Scikit's SGDClassifier achieves a maximum accuracy test score of 0.94.\\
 \\
 Compared to neural networks with sigmoid and tanh as activation function in figure \ref{fig:14}, the results are very similar. This is logical seeing as a neural network with one hidden layer using sigmoid as activation function is almost equivalent to logistic regression. The only difference is that the neural network uses the softmax function for the output layer.\\
 \\
 Logistic regression consistently outperforms neural networks using RELU or Leaky RELU as activation function for all $\eta$ and $\lambda$ values, and is on par with neural networks using sigmoid or tanh as activation function. The reason for this is likely due to the classification problem being quite simple. The images used are grayscale images with a total of 64 pixels. The important characteristics needed to accurately predict the number is less complex compared to other datasets and classification problems. As mentioned earlier with regression, neural networks has the advantage of being able to adapt to more complex and non-linear functions. For this reason, neural networks could likely outperform logistic regression for a more complex classification problem due to adaptability and generalizing enough to not overfit.\\
 \\
-In this case, logistic regression outperforms neural networks. A disadvantage with using neural networks is that it is quite computationally expensive to train, and if you want to use a more complex architecture you need more training data and training time. Logistic regression took significantly less time to train and was able to achieve the same level of accuracy. Another explanation as to why the nueral network performed worse or only on par with logistic regression could be due to the choice of architecture. The architecture chosen for the neural network could be suboptimal and changing it could improve the performance. 
+In this case, logistic regression outperforms neural networks. A disadvantage with using neural networks is that it is quite computationally expensive to train, and if you want to use a more complex architecture you need more training data and training time. Logistic regression took significantly less time to train and was able to achieve the same level of accuracy. \\
+\\
+Another explanation as to why the neural network performed worse or only on par with logistic regression could be due to the choice of architecture. The architecture chosen for the neural network could be suboptimal and changing it could improve the performance. There is a possibility that having more hidden layers could improve the accuracy given a higher number of epochs and more training data than used in this project. Due to the amount of time this would take on a personal computer, we were unable to test this.
 \begin{figure*}[ht]
     \centering
     \begin{subfigure}[b]{\columnwidth}
@@ -625,9 +627,9 @@ In this case, logistic regression outperforms neural networks. A disadvantage wi
 \end{figure*}
 \newpage
 \section{Conclusion}
-When only using the Stochastic Gradient Descent on the regression problem, we found that linear regression methods outperformed SGD. When comparing the different variants of SGD we found that due to computing an adaptive learning rate SGD with decaying learning rate, RMSprop and ADAM outperformed standard SGD. They performed better when increasing the size of the minibatches, and also converged quicker for a lower amount of epochs. For all variant, the results show a certain interval of learning rates where the error was considerably lower due to converging quickly enough but not diverging.\\
+When only using the Stochastic Gradient Descent on the regression problem, we found that linear regression methods outperformed SGD. When comparing the different variants of SGD we found that due to computing an adaptive learning rate SGD with decaying learning rate, RMSprop and ADAM outperformed standard SGD. They performed better when increasing the size of the minibatches, and also converged quicker for a lower amount of epochs. For all variants, the results show a certain interval of learning rates where the error was considerably lower due to converging quickly enough but not diverging.\\
 \\
-Applying a neural network on the regression problem resulted in a lower error compared to linear regression methods. The reason for this is due to neural networks being more adaptable to highly non-linear functions such as the Franke function and also generalize enough to prevent overfitting. On the classification problem, logistic regression performed an par with a neural network using the hyperbolic function as activation function. Due to the classification problem being less complex compared to other classification problems, there was no benefit of using neural networks over logistic regression. When testing with different architectures, the accuracy increased as the number of neurons was increased up to a certain number where the accuracy converged. Increasing the number of hidden layers resulted in most cases a decreased accuracy due to overfitting. \\
+Applying a neural network on the regression problem resulted in a lower error compared to linear regression methods. The reason for this is due to neural networks being more adaptable to highly non-linear functions such as the Franke function and also generalize enough to prevent overfitting. On the classification problem, logistic regression performed an par with a neural network using the hyperbolic function as activation function. Due to the classification problem being less complex compared to other classification problems, there was no benefit of using neural networks over logistic regression. When testing with different architectures, the accuracy increased as the number of neurons was increased up to a certain number where the accuracy converged. Increasing the number of hidden layers resulted in most cases a decreased accuracy due to overfitting, or possibly not enough training time and training data. \\
 \\
 For both the regression problem and classification problem, neural networks was able to outperform or on par with simpler models but required significantly more time to train. In summary it is more beneficial, when approaching a regression or classification problem, to start out with using a simpler model/method. In some cases the simpler models are more than sufficient, but if the performance is not satisfactory then neural networks could likely be better suited to the problem.\\
 \\
