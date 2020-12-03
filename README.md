@@ -6,6 +6,8 @@ Repository contains the code and report written for the projects in the course F
 
 [Project 2 - Classification and Regression, from linear and logistic regression to neural networks](Project2/Report/FYS_STK3155_Project2.pdf)
 
+[Project 3 - Classification of heart disease presence using Decision Trees, Random Forests, Gradient Boosting and Adaptive Boosting](Project3/Report/FYS_STK3155_Project3.pdf)
+
 ## Course content
 The course introduces a variety of central algorithms and methods essential for studies of data analysis and machine learning. The course is project based and through the various projects, the students will be exposed to fundamental research problems in these fields, with the aim to reproduce state of the art scientific results. The students will learn to develop and structure large codes for studying these systems, get acquainted with computing facilities and learn to handle large scientific projects. A good scientific and ethical conduct is emphasized throughout the course.
 

@@ -1,0 +1,27 @@
+\begin{tabular}{rllllr}
+\toprule
+ rank\_test\_score & param\_max\_depth & param\_min\_samples\_split & param\_min\_samples\_leaf & param\_splitter &  mean\_test\_score \\
+\midrule
+               1 &              50 &                       2 &                    0.1 &         random &         0.806117 \\
+               2 &              10 &                       4 &                    0.2 &         random &         0.802039 \\
+               2 &             100 &                       4 &                    0.2 &         random &         0.802039 \\
+               4 &               5 &                       5 &                      1 &         random &         0.801773 \\
+               5 &              40 &                       5 &                    0.4 &         random &         0.797784 \\
+               5 &             100 &                       5 &                    0.1 &         random &         0.797784 \\
+               7 &            None &                       5 &                    0.1 &         random &         0.793528 \\
+               8 &              50 &                       5 &                    0.3 &         random &         0.789273 \\
+               8 &              20 &                       5 &                    0.3 &         random &         0.789273 \\
+               8 &             100 &                       2 &                    0.2 &         random &         0.789273 \\
+               8 &              40 &                       3 &                    0.3 &         random &         0.789273 \\
+               8 &              20 &                       2 &                    0.3 &         random &         0.789273 \\
+              13 &              20 &                       2 &                    0.1 &         random &         0.789184 \\
+              14 &             100 &                       2 &                    0.4 &         random &         0.789184 \\
+              14 &              40 &                       4 &                    0.4 &         random &         0.789184 \\
+              16 &               5 &                       2 &                      1 &         random &         0.788918 \\
+              17 &              40 &                       2 &                    0.1 &         random &         0.785106 \\
+              18 &              50 &                       5 &                    0.2 &         random &         0.785018 \\
+              18 &              50 &                       4 &                    0.4 &           best &         0.785018 \\
+              18 &              20 &                       4 &                    0.4 &           best &         0.785018 \\
+              18 &              50 &                       2 &                    0.2 &           best &         0.785018 \\
+\bottomrule
+\end{tabular}
