@@ -39,3 +39,16 @@ src directory contains all source code used to produce the results in the report
 
         Method argument is required. If grid is specified, the code will perform a grid search with the specified classification method.
 
+## Packages required to use the code
+
+**Numpy**
+- Install using: **pip3 install numpy**
+
+**Scikit-Learn**
+- Install using: **pip3 install scikit-learn**
+
+**Matplotlib**
+- Install using: **pip3 install matplotlib**
+
+**Seaborn**
+- Install using: **pip3 install seaborn**
