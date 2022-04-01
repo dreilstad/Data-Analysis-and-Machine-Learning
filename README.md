@@ -1,4 +1,4 @@
-# FYS-STK3155 - Applied Data Analysis and Machine Learning
+Applied Data Analysis and Machine Learning
 
 Repository contains the code and report written for the projects in the course FYS-STK3155/4155 at University of Oslo.
 
